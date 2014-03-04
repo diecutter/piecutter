@@ -1,6 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import pkg_resources
 
-__author__ = 'Rémy HUBSCHER'
-__email__ = 'hubscher.remy@gmail.com'
-__version__ = '0.1'
+
+#: Module version, as defined in PEP-0396.
+__version__ = pkg_resources.get_distribution(__package__).version
