@@ -151,7 +151,7 @@ class DirResourceTestCase(unittest.TestCase):
     def test_content_type(self):
         """DirResource.content_type is 'application/zip'."""
         resource = resources.DirResource()
-        self.assertEqual(resource.content_type, 'application/zip')
+        self.assertEqual(resource.content_type, 'text/directory')
 
     def test_exists_false(self):
         """DirResource.exists is False if dir doesn't exist at path."""

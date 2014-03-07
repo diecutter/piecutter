@@ -1,5 +1,7 @@
-include AUTHORS.rst
+include AUTHORS
+include CHANGELOG
 include CONTRIBUTING.rst
-include HISTORY.rst
+include INSTALL
 include LICENSE
 include README.rst
+include VERSION

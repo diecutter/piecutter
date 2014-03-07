@@ -1,57 +1,68 @@
+# Reference card for usual actions in development environment.
+#
+# For standard installation of diecutter, see INSTALL.
+# For details about diecutter's development environment, see CONTRIBUTING.rst.
+#
+PIP = pip
+TOX = tox
+PROJECT = $(shell python -c "import setup; print setup.NAME")
+
+
 .PHONY: clean-pyc clean-build docs clean
 
+
+#: help - Display callable targets.
 help:
-	@echo "clean-build - remove build artifacts"
-	@echo "clean-pyc - remove Python file artifacts"
-	@echo "lint - check style with flake8"
-	@echo "test - run tests quickly with the default Python"
-	@echo "test-all - run tests on every Python version with tox"
-	@echo "coverage - check code coverage quickly with the default Python"
-	@echo "docs - generate Sphinx HTML documentation, including API docs"
-	@echo "release - package and upload a release"
-	@echo "sdist - package"
+	@echo "Reference card for usual actions in development environment."
+	@echo "Here are available targets:"
+	@egrep -o "^#: (.+)" [Mm]akefile  | sed 's/#: /* /'
 
+
+#: develop - Install minimal development utilities.
+develop:
+	$(PIP) install tox
+	$(PIP) install -e .
+
+
+#: clean - Basic cleanup, mostly temporary files.
 clean: clean-build clean-pyc
-	rm -fr htmlcov/
+	find . -name '*.pyc' -delete
+	find . -name '*.pyo' -delete
 
-clean-build:
-	rm -fr build/
-	rm -fr dist/
-	rm -fr *.egg-info
 
-clean-pyc:
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
+#: distclean - Remove local builds, such as *.egg-info.
+distclean: clean
+	rm -rf *.egg
+	rm -rf *.egg-info
 
-lint:
-	flake8 piecutter tests
 
+#: maintainer-clean - Remove almost everything that can be re-generated.
+maintainer-clean: distclean
+	rm -rf bin/
+	rm -rf lib/
+	rm -rf build/
+	rm -rf dist/
+	rm -rf .tox/
+
+
+#: test - Run test suites.
 test:
-	python setup.py test
+	$(TOX)
 
-test-all:
-	tox
 
-coverage:
-	coverage run --source piecutter setup.py test
-	coverage report -m
-	coverage html
-	open htmlcov/index.html
+#: documentation - Build documentation (Sphinx, README, ...)
+documentation: sphinx readme
 
-docs:
-	rm -f docs/piecutter.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ piecutter
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	open docs/_build/html/index.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+sphinx:
+	$(TOX) -e sphinx
 
-dist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
+
+#: readme - Build standalone documentation files (README, CONTRIBUTING...).
+readme:
+	$(TOX) -e readme
+
+
+#: release - Tag and push to PyPI.
+release:
+	$(TOX) -e release

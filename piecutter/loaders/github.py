@@ -3,9 +3,9 @@
 import os
 import tarfile
 
-from pyramid.exceptions import NotFound
 import requests
 
+from piecutter.exceptions import TemplateNotFound
 from piecutter.resources import FileResource, DirResource
 
 
@@ -49,7 +49,7 @@ class GithubLoader(object):
         except requests.exceptions.RequestException as e:
             raise e
         if response.status_code == 404:
-            raise NotFound()
+            raise TemplateNotFound(url)
         return response.raw
 
     def github_targz_url(self, user, project, commit):

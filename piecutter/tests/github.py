@@ -9,16 +9,15 @@ try:
 except ImportError:
     import mock
 
-import pyramid.exceptions
 import requests
 
+import piecutter.exceptions
+from piecutter.loaders.github import GithubLoader
 from piecutter.utils import temporary_directory
-import piecutter.github
 
 
 class GithubLoaderTestCase(unittest.TestCase):
-    """Tests around :py:class:`piecutter.github.GithubLoader`."""
-
+    """Tests around :py:class:`piecutter.loaders.github.GithubLoader`."""
     def setup_targz(self, path, project, commit):
         """Create archive file in ``path``."""
         with tarfile.open(path, mode='w:gz') as archive:
@@ -39,7 +38,7 @@ class GithubLoaderTestCase(unittest.TestCase):
             with open(archive_name, 'r') as archive:
                 content_mock = mock.Mock(return_value=archive)
                 with temporary_directory() as output_dir:
-                    loader = piecutter.github.GithubLoader(output_dir)
+                    loader = GithubLoader(output_dir)
                     loader.github_targz_content = content_mock
                     loader.github_targz('fake-user', 'piecutter', 'master')
                     self.assertTrue(
@@ -57,9 +56,10 @@ class GithubLoaderTestCase(unittest.TestCase):
                 response_mock.raw = archive
                 response_mock.status_code = 200
                 get_mock = mock.Mock(return_value=response_mock)
-                with mock.patch('piecutter.github.requests.get', new=get_mock):
+                with mock.patch('piecutter.loaders.github.requests.get',
+                                new=get_mock):
                     with temporary_directory() as output_dir:
-                        loader = piecutter.github.GithubLoader(output_dir)
+                        loader = GithubLoader(output_dir)
                         content = loader.github_targz_content('fake-url')
                         self.assertTrue(archive is content)
 
@@ -70,9 +70,10 @@ class GithubLoaderTestCase(unittest.TestCase):
             self.setup_targz(archive_name, 'piecutter', 'master')
             get_mock = mock.Mock(
                 side_effect=requests.exceptions.ConnectionError)
-            with mock.patch('piecutter.github.requests.get', new=get_mock):
+            with mock.patch('piecutter.loaders.github.requests.get',
+                            new=get_mock):
                 with temporary_directory() as output_dir:
-                    loader = piecutter.github.GithubLoader(output_dir)
+                    loader = GithubLoader(output_dir)
                     self.assertRaises(
                         requests.exceptions.ConnectionError,
                         loader.github_targz_content,
@@ -86,10 +87,11 @@ class GithubLoaderTestCase(unittest.TestCase):
             response_mock = mock.MagicMock()
             response_mock.status_code = 404
             get_mock = mock.Mock(return_value=response_mock)
-            with mock.patch('piecutter.github.requests.get', new=get_mock):
+            with mock.patch('piecutter.loaders.github.requests.get',
+                            new=get_mock):
                 with temporary_directory() as output_dir:
-                    loader = piecutter.github.GithubLoader(output_dir)
+                    loader = GithubLoader(output_dir)
                     self.assertRaises(
-                        pyramid.exceptions.NotFound,
+                        piecutter.exceptions.TemplateNotFound,
                         loader.github_targz_content,
                         'fake-url')
