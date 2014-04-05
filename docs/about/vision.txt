@@ -70,3 +70,10 @@ A framework
 `piecutter` is a framework. It is built with flexibility in mind. It is a
 library to build other software. It provides material to connect to third-party
 tools. It is easy to extend.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`Python`: http://python.org
