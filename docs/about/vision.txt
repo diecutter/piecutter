@@ -1,3 +1,79 @@
 ######
 Vision
 ######
+
+`piecutter` is about file generation. Its primary goal is to provide a generic
+API to render templates against data.
+
+
+****************************
+Render template against data
+****************************
+
+`piecutter` has been created for the following pattern:
+
+* you have a template. To its simplest expression, it is content with
+  placeholders ;
+
+* you have data ;
+
+* you want to render the template against the data.
+
+The important point here is that, as an user, you handle templates and data,
+whereas you do not want to bother with the rendering process. You expect
+`piecutter` to generate the content, whatever the template and the data you
+provide.
+
+
+**********************
+Wherever the templates
+**********************
+
+Templates can theorically live anywhere: on local filesystem, on remote places,
+or they could be generated in some way... As a user, I do not want to bother
+with template loading, I just want templates to be loaded and rendered against
+data.
+
+One could say templates are just strings and loading could be done by the user,
+i.e. the feature could be simplified to "render string against data". But
+templates often take advantage of features like "includes" or "extends". Such
+features require loaders.
+
+Of course `piecutter` cannot implement all template storages. It provides
+implementation for simplest ones (string, local filesystem) and an API for
+third-parties to implement additional loaders.
+
+
+****************************
+Whatever the template engine
+****************************
+
+As a matter of fact, templates are written using the syntax of one template
+engine. But whatever this syntax, you basically want it rendered.
+
+
+***********************
+Data is dictionary-like
+***********************
+
+`piecutter` supports neither loading of various data formats nor loading from
+various locations. The `Python`_ language has nice libraries for that purpose.
+
+`piecutter` expects a structured data input, i.e. a dictionary-like object.
+That's enough.
+
+
+***********
+A framework
+***********
+
+`piecutter` is a framework. It is built with flexibility in mind. It is a
+library to build other software. It provides material to connect to third-party
+tools. It is easy to extend.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`Python`: http://python.org

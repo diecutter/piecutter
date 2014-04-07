@@ -5,6 +5,7 @@ About piecutter
 This section is about `piecutter` project itself.
 
 .. toctree::
+   :titlesonly:
 
    vision
    alternatives
