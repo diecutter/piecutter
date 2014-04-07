@@ -8,7 +8,7 @@ TOX = tox
 PROJECT = $(shell python -c "import setup; print setup.NAME")
 
 
-.PHONY: help develop clean distclean maintainer-clean test documentation sphinx readme release
+.PHONY: clean-pyc clean-build docs clean
 
 
 #: help - Display callable targets.
