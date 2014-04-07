@@ -11,6 +11,45 @@ piecutter
 `piecutter` is a templating framework written in Python.
 
 
+*******
+Example
+*******
+
+Here is a simple demo of `piecutter`'s API:
+
+.. code:: pycon
+
+   >>> import piecutter
+   >>> cutter = piecutter.Cutter(engine=piecutter.PythonFormatEngine())
+   >>> print(cutter.render("Hello {who}!", {'who': 'world'}))
+   Hello world!
+
+Here is another setup, where several template engines are registered:
+
+.. code:: pycon
+
+   >>> cutter = piecutter.Cutter(
+   ...     engine=piecutter.GuessEngine(
+   ...         engines=[
+   ...             piecutter.Jinja2Engine(),
+   ...             piecutter.DjangoEngine(),
+   ...             piecutter.PythonFormatEngine(),
+   ...         ],
+   ...     )
+   ... )
+
+Then we can use the cutter to render various templates:
+
+.. code:: pycon
+
+   >>> cutter.render("{# Jinja2 #}Hello {{ who }}!", {'who': 'world'})
+   'Hello world!'
+   >>> cutter.render("{# Django #}Hello {{ who }}!", {'who': 'world'})
+   'Hello world!'
+   >>> cutter.render("Hello {who}!", {'who': 'world'})
+   'Hello world!'
+
+
 ************
 Key features
 ************

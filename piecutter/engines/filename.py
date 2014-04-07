@@ -15,7 +15,7 @@ class FilenameEngine(Engine):
         """
         for key, val in context.iteritems():
             try:
-                template = template.replace('+%s+' % key, val)
+                template = template.replace('+{key}+'.format(key=key), val)
             except TypeError:
                 pass
         return template
