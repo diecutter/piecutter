@@ -1,111 +1,115 @@
-============
+############
 Contributing
-============
+############
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given. 
+Contributions are welcome, and they are greatly appreciated! Every little bit
+helps, and credit will always be given.
 
-You can contribute in many ways:
+This document provides guidelines for people who want to contribute to the
+project.
 
-Types of Contributions
-----------------------
 
-Report Bugs
-~~~~~~~~~~~
+*********
+Resources
+*********
 
-Report bugs at https://github.com/Natim/piecutter/issues.
+* Code repository: https://github.com/diecutter/piecutter
+* Bugtracker: https://github.com/diecutter/piecutter/issues
+* Continuous integration: https://travis-ci.org/diecutter/piecutter
 
-If you are reporting a bug, please include:
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
+*******************************************
+Create tickets: bugs, features, feedback...
+*******************************************
 
-Fix Bugs
-~~~~~~~~
+The best way to send feedback is to file an issue in the `bugtracker`_.
 
-Look through the GitHub issues for bugs. Anything tagged with "bug"
-is open to whoever wants to implement it.
+Please use the `bugtracker`_ **before** starting some work:
 
-Implement Features
-~~~~~~~~~~~~~~~~~~
+* check if the bug or feature request has already been filed. It may have been
+  answered too!
 
-Look through the GitHub issues for features. Anything tagged with "feature"
-is open to whoever wants to implement it.
+* else create a new ticket.
 
-Write Documentation
-~~~~~~~~~~~~~~~~~~~
+* if you plan to contribute, tell us, so that we are given an opportunity to
+  give feedback as soon as possible.
 
-piecutter could always use more documentation, whether as part of the 
-official piecutter docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+* in your commit messages, reference the ticket with some ``refs #TICKET-ID``
+  syntax.
 
-Submit Feedback
-~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/Natim/piecutter/issues.
+******************
+Use topic branches
+******************
 
-If you are proposing a feature:
+* Work in branches.
 
-* Explain in detail how it would work.
-* Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
+* Prefix your branch with the ticket ID corresponding to the issue. As an
+  example, if you are working on ticket #23 which is about contribute
+  documentation, name your branch like ``23-contribute-doc``.
 
-Get Started!
-------------
+* If you work in a development branch and want to refresh it with changes from
+  master, please `rebase`_ or `merge-based rebase`_, i.e. do not merge master.
 
-Ready to contribute? Here's how to set up `piecutter` for local development.
 
-1. Fork the `piecutter` repo on GitHub.
-2. Clone your fork locally::
+***********
+Fork, clone
+***********
 
-    $ git clone git@github.com:your_name_here/piecutter.git
+Clone `piecutter` repository (adapt to use your own fork):
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+.. code:: sh
 
-    $ mkvirtualenv piecutter
-    $ cd piecutter/
-    $ python setup.py develop
+   git clone git@github.com:<your-github-username-here>/piecutter.git
+   cd piecutter/
 
-4. Create a branch for local development::
 
-    $ git checkout -b name-of-your-bugfix-or-feature
-   
-   Now you can make your changes locally.
+*******************************
+Setup a development environment
+*******************************
 
-5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
+System requirements:
 
-    $ flake8 piecutter tests
-    $ python setup.py test
-    $ tox
+* `Python`_ version 2.7 (in a `virtualenv`_ if you like).
+* make and wget to use the provided `Makefile`.
 
-   To get flake8 and tox, just pip install them into your virtualenv. 
+Execute:
 
-6. Commit your changes and push your branch to GitHub::
+.. code:: sh
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+   make develop
 
-7. Submit a pull request through the GitHub website.
 
-Pull Request Guidelines
------------------------
+*************
+Usual actions
+*************
 
-Before you submit a pull request, check that it meets these guidelines:
+The `Makefile` is the reference card for usual actions in development
+environment:
 
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, and 3.3, and for PyPy. Check 
-   https://travis-ci.org/Natim/piecutter/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+* Install development toolkit with `pip`_: ``make develop``.
 
-Tips
-----
+* Run tests with `tox`_: ``make test``.
 
-To run a subset of tests::
+* Build documentation: ``make documentation``. It builds `Sphinx`_
+  documentation in `var/docs/html/index.html`.
 
-	$ python -m unittest tests.test_piecutter
+* Release `piecutter` project with `zest.releaser`_: ``make release``.
+
+* Cleanup local repository: ``make clean``, ``make distclean`` and
+  ``make maintainer-clean``.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`bugtracker`: https://github.com/diecutter/piecutter/issues
+.. _`rebase`: http://git-scm.com/book/en/Git-Branching-Rebasing
+.. _`merge-based rebase`: http://tech.novapost.fr/psycho-rebasing-en.html
+.. _`Python`: http://python.org
+.. _`virtualenv`: http://virtualenv.org
+.. _`pip`: https://pypi.python.org/pypi/pip/
+.. _`tox`: https://pypi.python.org/pypi/tox/
+.. _`Sphinx`: https://pypi.python.org/pypi/Sphinx/
+.. _`zest.releaser`: https://pypi.python.org/pypi/zest.releaser/
