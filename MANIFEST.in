@@ -1,3 +1,5 @@
+recursive-include piecutter *
+global-exclude *.pyc
 include AUTHORS
 include CHANGELOG
 include CONTRIBUTING.rst

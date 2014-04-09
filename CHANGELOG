@@ -5,10 +5,12 @@ This document describes changes between each past release. For information
 about future releases, check `milestones`_ and :doc:`/about/vision`.
 
 
-0.2 (unreleased)
-----------------
+0.1.1 (unreleased)
+------------------
 
-- Nothing changed yet.
+Fixes around distribution of release 0.1.
+
+- Bug #12 - piecutter archive on PyPI was missing many files.
 
 
 0.1 (2014-04-08)
@@ -16,7 +18,8 @@ about future releases, check `milestones`_ and :doc:`/about/vision`.
 
 Initial release.
 
-- Imported stuff from diecutter: loaders, writers, resources and engines.
+- Feature #6 - Imported stuff from diecutter: loaders, writers, resources and
+  engines.
 
 
 .. rubric:: Notes & references
