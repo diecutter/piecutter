@@ -13,6 +13,9 @@ API simplification.
 - Feature #9 - ``piecutter.Cutter`` class encapsulates template rendering
   process. Setup a cutter as you like, then use it to render templates.
 
+- Bug #11 - On PyPI, README is rendered as HTML (was not, because of some raw
+  HTML). Badges were removed from PyPI page.
+
 
 0.1.1 (2014-04-09)
 ------------------
