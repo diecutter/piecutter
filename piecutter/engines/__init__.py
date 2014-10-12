@@ -7,7 +7,7 @@ class Engine(object):
 
     Mostly used to document engine API.
 
-    Subclasses must implement :py:meth:`render`:
+    Subclasses must implement :meth:`render`: and :meth:`match`.
 
     >>> from piecutter.engines import Engine
     >>> engine = Engine()
@@ -23,3 +23,20 @@ class Engine(object):
         """Return the rendered template against context."""
         raise NotImplementedError('Subclasses of "piecutter.engines.Engine" '
                                   'must implement render() method.')
+
+    def match(self, template, context):
+        """Return probability that template uses engine.
+
+        If a template is not written in engine's syntax, the probability should
+        be 0.0.
+
+        If there is no doubt the template has been written for engine, the
+        probability should be 1.0. A shebang at the beginning of the template
+        may be the safest way to be sure the template has been written for a
+        given engine.
+
+        Else, the probability should be strictly between 0.0 and 1.0.
+
+        """
+        raise NotImplementedError('Subclasses of "piecutter.engines.Engine" '
+                                  'must implement match() method.')

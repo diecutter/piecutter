@@ -275,16 +275,16 @@ class DirResourceTestCase(unittest.TestCase):
                                context)])
 
     def test_has_tree_template(self):
-        """DirResource.has_tree_template() checks if .directory-tree exists."""
+        """DirResource.has_tree_template() checks if directory tree exists."""
         with temporary_directory() as template_dir:
             dir_path = template_dir
             resource = resources.DirResource(path=dir_path)
             self.assertFalse(resource.has_tree_template())
-            open(join(dir_path, '.directory-tree'), 'w')
+            open(join(dir_path, resources.TREE_TEMPLATE), 'w')
             self.assertTrue(resource.has_tree_template())
 
     def test_render_dynamic_tree(self):
-        """DirResource.render_tree() uses .directory-tree template."""
+        """DirResource.render_tree() uses directory tree template."""
         content_engine = mock.MagicMock()
         content_engine.render = lambda t, c: t
         filename_engine = mock.MagicMock()
@@ -297,7 +297,7 @@ class DirResourceTestCase(unittest.TestCase):
                               {'template': 'template_two.txt',
                                'filename': '2.txt',
                                'context': {}}]
-            open(join(dir_path, '.directory-tree'), 'w').write(
+            open(join(dir_path, resources.TREE_TEMPLATE), 'w').write(
                 json.dumps(directory_tree))
             dir_path += sep
             resource = resources.DirResource(path=dir_path,
@@ -314,7 +314,7 @@ class DirResourceTestCase(unittest.TestCase):
         self.assertFalse(filename_engine.called)
 
     def test_render_dynamic_tree_relative_paths(self):
-        """Raises exception if .directory-tree contains some non relative path.
+        """Raises exception if directory tree contains some non relative path.
 
         .. warning::
 
@@ -334,7 +334,7 @@ class DirResourceTestCase(unittest.TestCase):
             directory_tree = [{'template': '../template_one.txt',
                                'filename': '1.txt',
                                'context': {}}]
-            open(join(dir_path, '.directory-tree'), 'w').write(
+            open(join(dir_path, resources.TREE_TEMPLATE), 'w').write(
                 json.dumps(directory_tree))
             dir_path += sep
             resource = resources.DirResource(path=dir_path,

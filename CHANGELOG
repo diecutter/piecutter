@@ -8,7 +8,10 @@ about future releases, check `milestones`_ and :doc:`/about/vision`.
 0.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+API simplification.
+
+- Feature #9 - ``piecutter.Cutter`` class encapsulates template rendering
+  process. Setup a cutter as you like, then use it to render templates.
 
 
 0.1.1 (2014-04-09)

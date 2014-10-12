@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Jinja2 template engine."""
 import os
+import re
 
 from jinja2 import Environment
 from jinja2.exceptions import UndefinedError, TemplateSyntaxError
@@ -104,3 +105,24 @@ class Jinja2Engine(Engine):
             return template.render(**context)
         except (UndefinedError, TypeError) as e:
             raise TemplateError(e)
+
+    def match(self, template, context):
+        """Return a ratio showing whether template looks like using engine.
+
+        >>> engine = Jinja2Engine()
+        >>> engine.match('', {})
+        0.0
+        >>> engine.match('{# Jinja2 #}', {})
+        1.0
+        >>> engine.match('Not shebang {# Jinja2 #}', {})
+        0.0
+        >>> engine.match('{{ key }}', {})
+        0.9
+
+        """
+        # Try to locate a root variable in template.
+        if template.startswith('{# Jinja2 #}'):
+            return 1.0
+        if re.search(r'{{ .+ }}', template):
+            return 0.9
+        return 0.0
