@@ -2,12 +2,6 @@
 piecutter
 #########
 
-.. raw:: html
-
-   <a href="http://badge.fury.io/py/piecutter"><img src="https://badge.fury.io/py/piecutter.png"></a>
-   <a href="https://travis-ci.org/diecutter/piecutter"><img src="https://travis-ci.org/diecutter/piecutter.png?branch=master"></a>
-   <a href="https://crate.io/packages/piecutter?version=latest"><img src="https://pypip.in/d/piecutter/badge.png"></a>
-
 `piecutter` is a template rendering framework, written in `Python`_.
 
 Leitmotiv: **render templates against context**, wherever the templates,
