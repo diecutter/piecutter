@@ -7,6 +7,10 @@ from os.path import basename, isdir, isfile, join, normpath, relpath, sep
 from piecutter.exceptions import TemplateError
 
 
+#: Name of the tree template file.
+TREE_TEMPLATE = '.directory-tree'
+
+
 class Resource(object):
     def __init__(self, path='', engine=None, filename_engine=None):
         """Constructor.
@@ -154,10 +158,10 @@ class DirResource(Resource):
                 yield (resource_path, filename, context)
 
     def has_tree_template(self):
-        """Return True if .directory-tree file exists."""
+        """Return True if :glob:`TREE_TEMPLATE` file exists."""
         lines = [self.relative_filename(line, with_prefix=False)
                  for line in self.read_tree()]
-        return '.directory-tree' in lines
+        return TREE_TEMPLATE in lines
 
     def get_file_resource(self, path):
         """Factory for internal FileResources."""
@@ -174,7 +178,7 @@ class DirResource(Resource):
 
     def get_tree_template(self):
         """Return FileResource that holds directory tree."""
-        return self.get_file_resource('.directory-tree')
+        return self.get_file_resource(TREE_TEMPLATE)
 
     def render_tree_from_template(self, template, context):
         """Generate directory tree from a template file resource."""
