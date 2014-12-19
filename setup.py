@@ -63,7 +63,10 @@ REQUIREMENTS = [
     'six',
 ]
 if IS_PYTHON2:
-    REQUIREMENTS.extend(['mock'])
+    REQUIREMENTS.extend([
+        'mock',
+        'pathlib',
+    ])
 ENTRY_POINTS = {}
 TEST_REQUIREMENTS = ['tox']
 CMDCLASS = {'test': Tox}

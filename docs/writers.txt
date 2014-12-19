@@ -1,0 +1,12 @@
+#######
+Writers
+#######
+
+This document explains `piecutter`'s writers.
+
+
+**********************
+Write output to a file
+**********************
+
+

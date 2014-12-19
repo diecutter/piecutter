@@ -16,6 +16,8 @@ class DjangoEngine(Engine):
     """Django template engine."""
     def render(self, template, context):
         """Return the rendered template against context."""
+        context.setdefault('piecutter', {})
+        context['piecutter']['engine'] = 'django'
         try:
             return Template(template).render(Context(context))
         except TemplateSyntaxError as e:

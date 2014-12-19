@@ -1,0 +1,188 @@
+########
+Overview
+########
+
+This document describes `piecutter`'s concepts and main features.
+See also :doc:`/about/vision`.
+
+.. doctest::
+
+   >>> import piecutter  # All-in-one API.
+   >>> data = {'who': 'world'}  # Prepare data as a dictionary.
+
+
+*********
+Renderers
+*********
+
+:doc:`Renderers </renderers>` are the core feature of `piecutter`. They use
+template engines to generate output using templates and context data.
+
+Renderers typically are classes that implement a ``render(template, context)``
+method which generates output.
+
+`piecutter` supports several template engines with a single API:
+
+* Python's builtin string format
+* Jinja2
+* Django
+* ... and all you can implement!
+
+`piecutter` also provides a special engine that guesses the adequate template
+engine based on the content of the template.
+
+Learn more in :doc:`/renderers`.
+
+
+*******
+Loaders
+*******
+
+:doc:`Loaders </loaders>` load :doc:`templates </templates>`.
+
+Loaders typically are classes that define a ``load(location)`` method. This
+method returns a template object.
+
+`piecutter` provides builtin support for various locations:
+
+* files on local filesystem:
+
+  .. doctest::
+
+     >>> loader = piecutter.LocalLoader(root='../demo')
+     >>> with loader.open('hello.txt') as template:
+     ...     print(template)
+     Hello {who}!
+     <BLANKLINE>
+
+* remote files over HTTP:
+
+  .. doctest::
+
+     >>> loader = piecutter.HttpLoader()
+     >>> location = 'https://raw.githubusercontent.com' \
+     ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+     >>> with loader.open(location) as template:
+     ...     print(template)
+     {{ greetings|default('Hello') }} {{ name }}!
+     <BLANKLINE>
+
+* remote files on Github:
+
+  .. code:: pycon
+
+     >>> loader = piecutter.GithubLoader()
+     >>> location = 'diecutter/piecutter/master/demo/hello.txt'
+     >>> with loader.open(location) as template:
+     ...     print(template)
+     Hello {who}!
+     <BLANKLINE>
+
+Of course, you can write your own loaders!
+
+See :doc:`loaders </loaders>` for details.
+
+
+*********
+Templates
+*********
+
+`piecutter` handles :doc:`template objects </templates>`. They are, basically,
+`Python` objects whose content can be read.
+
+Templates can represent either single units (files) or collections
+(directories).
+
+`piecutter` can render text, files or special ``Template`` objects:
+
+.. doctest::
+
+   >>> render = piecutter.PythonFormatEngine()  # Tip: renderers are callables.
+
+   >>> print(render('Hello {who}!', {'who': 'world'}))
+   Hello world!
+
+   >>> from StringIO import StringIO
+   >>> print(render(StringIO(u'Hello {who}!'), {'who': 'world'}))
+   Hello world!
+
+
+****
+Data
+****
+
+`piecutter` uses mappings as context data. Any dictionary-like object can be
+used. See :doc:`context` for details.
+
+
+*******
+Writers
+*******
+
+`piecutter` uses writers to post-process template rendering output. Writers
+typically are classes that implement a ``write(template, context, output)``
+method.
+
+
+*******
+Cutters
+*******
+
+Cutters encapsulate full template rendering workflow, from template loading to
+output post-processing, via template rendering of course.
+Cutters are the glue for all the features of `piecutter`:
+
+Cutters are callables that take ``location`` and ``data`` as input and write
+output somewhere. They typically are objects that can be configured using
+loaders, renderers, writers...
+
+.. doctest::
+
+   >>> import sys
+   >>> render = piecutter.Cutter(
+   ...     loader=piecutter.HttpLoader(),
+   ...     engine=piecutter.Jinja2Engine(),
+   ...     writer=piecutter.StreamWriter(sys.stdout),
+   ... )
+   >>> render(
+   ...     'https://raw.githubusercontent.com'
+   ...     '/diecutter/diecutter/0.7/demo/templates/greetings.txt',
+   ...     {'name': 'world'})
+   Hello world!
+
+Here is another setup, where several template engines are registered:
+
+.. doctest::
+
+   >>> cutter = piecutter.Cutter(
+   ...     engine=piecutter.SmartEngine(
+   ...         engines=[
+   ...             piecutter.Jinja2Engine(),
+   ...             piecutter.DjangoEngine(),
+   ...             piecutter.PythonFormatEngine(),
+   ...         ],
+   ...     )
+   ... )
+
+Then we can use the cutter to render various templates:
+
+.. doctest::
+
+   >>> print(cutter.render("{# Jinja2 #}Hello {{ who }}!", {'who': 'world'}))
+   Hello world!
+   >>> print(cutter.render("{# Django #}Hello {{ who }}!", {'who': 'world'}))
+   Hello world!
+   >>> print(cutter.render("Hello {who}!", {'who': 'world'}))
+   Hello world!
+
+
+***********
+Dispatchers
+***********
+
+`piecutter` renders templates using processing pipelines. As an example,
+writers can be chained to perform several operations. Or before a specific
+template engine is called, context data is updated with some `piecutter`'s
+internals... Everywhere processing could be done by either one or several
+functions, you can use dispatchers: they look like one function but encapsulate
+several calls.

@@ -32,7 +32,7 @@ class CutterTestCase(unittest.TestCase):
 
     def test_render_multiple(self):
         cutter = piecutter.Cutter(
-            engine=piecutter.GuessEngine(
+            engine=piecutter.SmartEngine(
                 engines=[
                     piecutter.Jinja2Engine(),
                     piecutter.DjangoEngine(),

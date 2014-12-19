@@ -1,0 +1,12 @@
+#######
+Cutters
+#######
+
+This document explains `piecutter`'s cutters.
+
+Cutters encapsulate full template rendering workflow, from template loading to
+output post-processing, via template rendering of course.
+
+Cutters are callables that take ``location`` and ``data`` as input and write
+output somewhere. They typically are objects that can be configured using
+loaders, renderers, writers...

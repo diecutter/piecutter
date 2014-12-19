@@ -1,0 +1,61 @@
+###########
+Dispatchers
+###########
+
+.. py:module:: piecutter.utils.dispatchers
+
+`piecutter`'s dispatchers are made to configure pipelines. As a summary, use a
+dispatcher wherever you could use a single callable.
+
+Dispatchers are configurable callables.
+
+.. note::
+
+   In future releases, dispatchers may be distributed in their own library,
+   because they provide features that could be useful apart from `piecutter`,
+   i.e. `piecutter` would depend on this external library.
+
+
+*********************
+FirstResultDispatcher
+*********************
+
+.. doctest::
+
+   >>> from piecutter.utils import dispatchers
+
+   >>> zero = lambda x: None
+   >>> one = lambda x: dispatchers.NO_RESULT
+   >>> two = lambda x: 'two {thing}'.format(thing=x)
+   >>> three = lambda x: 'three {thing}'.format(thing=x)
+   >>> callable = dispatchers.FirstResultDispatcher([zero, one, two, three])
+   >>> print callable('sheep')
+   two sheep
+
+
+********************
+LastResultDispatcher
+********************
+
+.. doctest::
+
+   >>> one = lambda x: 'one {thing}'.format(thing=x)
+   >>> two = lambda x: 'two {thing}'.format(thing=x)
+   >>> three = lambda x: 'three {thing}'.format(thing=x)
+   >>> callable = dispatchers.LastResultDispatcher([zero, one, two, three])
+   >>> print callable('sheep')
+   three sheep
+
+
+***************
+ChainDispatcher
+***************
+
+.. doctest::
+
+   >>> strip = lambda x: x.strip()
+   >>> upper = lambda x: x.upper()
+   >>> strong = lambda x: '<strong>{thing}</strong>'.format(thing=x)
+   >>> callable = dispatchers.ChainDispatcher([strip, upper, strong])
+   >>> print callable('    sheep           ')
+   <strong>SHEEP</strong>

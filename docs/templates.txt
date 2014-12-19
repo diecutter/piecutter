@@ -1,0 +1,102 @@
+################
+Template objects
+################
+
+.. py:module:: piecutter.templates
+
+This document describes `piecutter`'s template objects and their usage.
+
+`piecutter` handles two types of templates:
+
+* files: they are rendered as single units.
+* directories: they are rendered as collections of files.
+
+
+*************************
+Create template from text
+*************************
+
+You can instantiate templates from text:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> from __future__ import print_function
+
+   >>> template = piecutter.TextTemplate("I'm a template")
+   >>> template  # Doctest: +ELLIPSIS
+   <piecutter.templates.TextTemplate object at 0x...>
+   >>> print(template)
+   I'm a template
+
+
+*************************
+Create template from file
+*************************
+
+You can create templates from file-like objects:
+
+.. doctest::
+
+   >>> with open('../demo/hello.txt') as template_file:
+   ...     template = piecutter.FileTemplate(template_file)
+   ...     template  # Doctest: +ELLIPSIS
+   ...     print(template)
+   <piecutter.templates.FileTemplate object at 0x...>
+   Hello {who}!
+   <BLANKLINE>
+
+
+*************************************
+Create template from custom locations
+*************************************
+
+You can use :doc:`loaders </loaders>` to instantiate templates from custom
+locations:
+
+.. doctest::
+
+   >>> import pathlib
+   >>> loader = piecutter.LocalLoader(root=pathlib.Path('../demo'))
+   >>> with loader.open('hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
+
+You should be able to load files from almost everywhere, provided you have the
+right loaders. See :doc:`/loaders` for details.
+
+
+******************************
+Create template from directory
+******************************
+
+You can create templates from directories using loaders:
+
+.. doctest::
+
+   >>> with loader.open('.') as template:
+   ...     print(template)
+   [{"template": "hello.txt"}]
+
+
+*******************
+Automatic detection
+*******************
+
+.. doctest::
+
+   >>> template = piecutter.guess_template("I'm a template")
+   >>> isinstance(template, piecutter.TextTemplate)
+   True
+
+   >>> with open('index.txt') as template_file:
+   ...     template = piecutter.guess_template(template_file)
+   ...     isinstance(template, piecutter.FileTemplate)
+   True
+
+   >>> template = piecutter.SmartTemplate("I'm a template")
+   >>> template  # Doctest: +ELLIPSIS
+   <piecutter.templates.SmartTemplate object at 0x...>
+   >>> print(template)
+   I'm a template

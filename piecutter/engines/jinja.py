@@ -97,8 +97,10 @@ class Jinja2Engine(Engine):
 
     def render(self, template, context):
         """Return the rendered template against context."""
+        context.setdefault('piecutter', {})
+        context['piecutter']['engine'] = 'jinja2'
         try:
-            template = self.environment.from_string(template)
+            template = self.environment.from_string(str(template))
         except TemplateSyntaxError as e:
             raise TemplateError(e)
         try:
@@ -114,6 +116,8 @@ class Jinja2Engine(Engine):
         0.0
         >>> engine.match('{# Jinja2 #}', {})
         1.0
+        >>> engine.match('{# Jinja2 -#}', {})
+        1.0
         >>> engine.match('Not shebang {# Jinja2 #}', {})
         0.0
         >>> engine.match('{{ key }}', {})
@@ -122,6 +126,8 @@ class Jinja2Engine(Engine):
         """
         # Try to locate a root variable in template.
         if template.startswith('{# Jinja2 #}'):
+            return 1.0
+        if template.startswith('{# Jinja2 -#}'):
             return 1.0
         if re.search(r'{{ .+ }}', template):
             return 0.9

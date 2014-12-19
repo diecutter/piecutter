@@ -76,4 +76,4 @@ tools. It is easy to extend.
 
 .. target-notes::
 
-.. _`Python`: http://python.org
+.. _`Python`: https://www.python.org

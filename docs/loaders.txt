@@ -1,0 +1,73 @@
+#######
+Loaders
+#######
+
+This document describes usage for `piecutter`'s loaders.
+
+
+************************************
+Load templates from local filesystem
+************************************
+
+You can load local files:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> loader = piecutter.LocalLoader(root='../demo')
+
+   >>> with loader.open('hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
+
+   >>> with loader.open('i-dont-exist.txt') as template:  # Doctest: +ELLIPSIS
+   ...     print(template)
+   Traceback (most recent call last):
+     ...
+   TemplateNotFound: ...
+
+And local directories:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> loader = piecutter.LocalLoader(root='../demo')
+
+   >>> with loader.open('.') as template:
+   ...     print(template)
+   [{"template": "hello.txt"}]
+
+
+************************
+Load files on github.com
+************************
+
+.. code-block:: pycon
+
+   >>> from piecutter.utils.files import temporary_directory
+   >>> with temporary_directory() as checkout_dir:
+   ...     loader = piecutter.GithubLoader(checkout_dir)
+   ...     try:
+   ...         template = loader.open(
+   ...             'diecutter/diecutter/0.7/demo/templates/greetings.txt')
+   ...         print(template)
+   ...     finally:
+   ...         template.close()
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>
+
+
+********************
+Load files over HTTP
+********************
+
+.. doctest::
+
+   >>> loader = piecutter.HttpLoader()
+   >>> location = 'https://raw.githubusercontent.com' \
+   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> with loader.open(location) as template:
+   ...     print(template)
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>

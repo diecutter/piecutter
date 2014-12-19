@@ -4,8 +4,61 @@ piecutter
 
 `piecutter` is a template rendering framework, written in `Python`_.
 
-Leitmotiv: **render templates against context**, wherever the templates,
-whatever the template engine.
+Leitmotiv: **render templates against data**, wherever the templates, whatever
+the template engine.
+
+
+*******
+Example
+*******
+
+.. code-block:: pycon
+
+   >>> from __future__ import print_function
+   >>> import piecutter
+
+   >>> data = {'who': 'world'}
+
+   >>> renderer = piecutter.PythonFormatEngine()
+   >>> template = "Hello {who}!"
+   >>> print(renderer.render(template, data))
+   Hello world!
+
+   >>> loader = piecutter.LocalLoader(root='../demo/')
+   >>> template = loader.load('hello.txt')
+   >>> print(template)
+   Hello {who}!
+   <BLANKLINE>
+   >>> print(renderer.render(template, data))
+   Hello world!
+
+   >>> cutter = piecutter.Cutter(
+   ...     loader=piecutter.HttpLoader(),
+   ...     renderer=piecutter.PythonFormatEngine(),
+   ...     writer=piecutter.StreamWriter(),
+   ... )
+   >>> cutter.render(
+   ...     'https://raw.github.com/diecutter/piecutter/master/demo/hello.txt',
+   ...     data)
+   Hello world!
+
+
+************
+Key features
+************
+
+* Simple API: render templates against context.
+
+* Support multiple template engines: `Jinja2`_ and `Django`_ for now. Later:
+  `Cheetah`_ and even non-Python template engines such as Ruby's `ERB`_.
+
+* Render files and directories.
+
+* Load templates from almost everywhere: local filesystem and github.com for
+  now. Later: Django storages...
+
+* Do what you want with generated content: write to local filesystem, generate
+  an archive...
 
 
 **************
@@ -41,80 +94,23 @@ other usage.
 the API should be refactored, with simplicity in mind.
 
 
-*******
-Example
-*******
-
-Here is a simple demo of `piecutter`'s API:
-
-.. code:: pycon
-
-   >>> import piecutter
-   >>> cutter = piecutter.Cutter(engine=piecutter.PythonFormatEngine())
-   >>> print(cutter.render("Hello {who}!", {'who': 'world'}))
-   Hello world!
-
-Here is another setup, where several template engines are registered:
-
-.. code:: pycon
-
-   >>> cutter = piecutter.Cutter(
-   ...     engine=piecutter.GuessEngine(
-   ...         engines=[
-   ...             piecutter.Jinja2Engine(),
-   ...             piecutter.DjangoEngine(),
-   ...             piecutter.PythonFormatEngine(),
-   ...         ],
-   ...     )
-   ... )
-
-Then we can use the cutter to render various templates:
-
-.. code:: pycon
-
-   >>> cutter.render("{# Jinja2 #}Hello {{ who }}!", {'who': 'world'})
-   'Hello world!'
-   >>> cutter.render("{# Django #}Hello {{ who }}!", {'who': 'world'})
-   'Hello world!'
-   >>> cutter.render("Hello {who}!", {'who': 'world'})
-   'Hello world!'
-
-
-************
-Key features
-************
-
-* Simple API: render templates against context.
-
-* Support multiple template engines: `Jinja2`_ and `Django`_ for now. Later:
-  `Cheetah`_ and even non-Python template engines such as Ruby's `ERB`_.
-
-* Render files and directories.
-
-* Load templates from almost everywhere: local filesystem and github.com for
-  now. Later: Django storages...
-
-* Do what you want with generated content: write to local filesystem, generate
-  an archive...
-
-
 *********
 Resources
 *********
 
 * Documentation: https://piecutter.readthedocs.org
-* PyPI page: http://pypi.python.org/pypi/piecutter
+* PyPI page: https://pypi.python.org/pypi/piecutter
 * Bugtracker: https://github.com/diecutter/piecutter/issues
 * Changelog: https://piecutter.readthedocs.org/en/latest/about/changelog.html
-* Roadmap: https://github.com/diecutter/piecutter/issues/milestones
+* Roadmap: https://github.com/diecutter/piecutter/milestones
 * Code repository: https://github.com/diecutter/piecutter
 * Continuous integration: https://travis-ci.org/diecutter/piecutter
 
 
-.. _`Python`: https://python.org
+.. _`Python`: https://www.python.org
 .. _`diecutter`: http://diecutter.io
 .. _`join us`: https://piecutter.readthedocs.org/en/latest/contributing.html
 .. _`Jinja2`: http://jinja.pocoo.org/
-.. _`Django`: https://djangoproject.com
+.. _`Django`: https://www.djangoproject.com
 .. _`Cheetah`: http://pythonhosted.org/Cheetah/
 .. _`ERB`: http://ruby-doc.org/

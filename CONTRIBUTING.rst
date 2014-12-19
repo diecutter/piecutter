@@ -107,8 +107,8 @@ environment:
 .. _`bugtracker`: https://github.com/diecutter/piecutter/issues
 .. _`rebase`: http://git-scm.com/book/en/Git-Branching-Rebasing
 .. _`merge-based rebase`: http://tech.novapost.fr/psycho-rebasing-en.html
-.. _`Python`: http://python.org
-.. _`virtualenv`: http://virtualenv.org
+.. _`Python`: https://www.python.org
+.. _`virtualenv`: https://pypi.python.org/pypi/virtualenv/
 .. _`pip`: https://pypi.python.org/pypi/pip/
 .. _`tox`: https://pypi.python.org/pypi/tox/
 .. _`Sphinx`: https://pypi.python.org/pypi/Sphinx/

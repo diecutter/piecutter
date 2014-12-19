@@ -1,0 +1,103 @@
+###################
+Renderers & engines
+###################
+
+This document explains `piecutter`'s renderers.
+
+Renderers use template engines to generate output using templates and context
+data. They typically are classes that implement a ``render(template, context)``
+method which generates output.
+
+
+*************
+Python format
+*************
+
+.. doctest::
+
+   >>> import piecutter
+   >>> renderer = piecutter.PythonFormatEngine()
+   >>> print renderer.render('Hello {who}!', {'who': 'world'})
+   Hello world!
+
+
+******
+Jinja2
+******
+
+.. doctest::
+
+   >>> import piecutter
+   >>> renderer = piecutter.Jinja2Engine()
+   >>> print renderer.render('Hello {{ who }}!', {'who': 'world'})
+   Hello world!
+
+
+******
+Django
+******
+
+.. doctest::
+
+   >>> import piecutter
+   >>> renderer = piecutter.DjangoEngine()
+   >>> print renderer.render('Hello {{ who }}!', {'who': 'world'})
+   Hello world!
+
+
+*****
+Smart
+*****
+
+This is a special renderer that tries to detect best engine depending on
+template and environment (installed engines).
+
+   >>> import piecutter
+   >>> renderer = piecutter.SmartEngine(
+   ...     engines=[
+   ...         piecutter.Jinja2Engine(),
+   ...         piecutter.DjangoEngine(),
+   ...         piecutter.PythonFormatEngine(),
+   ...     ],
+   ... )
+   >>> print renderer.render("{# Jinja2 #}Hello {{ who }}!", {'who': 'world'})
+   Hello world!
+   >>> print renderer.render("{# Django #}Hello {{ who }}!", {'who': 'world'})
+   Hello world!
+   >>> print renderer.render("Hello {who}!", {'who': 'world'})
+   Hello world!
+
+
+******************
+Render directories
+******************
+
+Renderers can also handle directories, as collections of single templates:
+
+.. doctest::
+
+   >>> data = {'who': 'world'}
+   >>> renderer = piecutter.PythonFormatEngine()
+   >>> loader = piecutter.LocalLoader(root='../demo/')
+   >>> with loader.open('.') as parent_template:
+   ...     for child_template in renderer.render(parent_template, data):
+   ...         print child_template.name
+   ...         with loader.open(child_template.name) as child_opened:
+   ...             print child_opened
+   hello.txt
+   Hello {who}!
+   <BLANKLINE>
+
+
+***********************
+Renderers are callables
+***********************
+
+Builtin `piecutter` renderers are callables:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.PythonFormatEngine()
+   >>> print render('Hello {who}!', {'who': 'world'})
+   Hello world!

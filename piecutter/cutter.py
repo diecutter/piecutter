@@ -1,4 +1,9 @@
-"""Cutter class."""
+"""Cutters encapsulate template rendering process.
+
+:class:`Cutter` class is the reference implementation.
+
+"""
+import contextlib
 
 
 class Cutter(object):
@@ -18,9 +23,11 @@ class Cutter(object):
         self.engine = engine
         self.writer = writer
 
-    def load(self, location):
+    @contextlib.contextmanager
+    def open(self, location):
         """Return template resource."""
-        return self.loader.load(location)
+        with self.loader.open(location) as template:
+            yield template
 
     def render(self, template, data):
         """Return result of template rendered against data."""
@@ -36,6 +43,5 @@ class Cutter(object):
         Executes the full process on a template: load, render, write.
 
         """
-        template = self.load(location)
-        content = self.render(template, data)
-        return self.write(content)
+        with self.open(location) as template:
+            return self.write(self.render(template, data))
