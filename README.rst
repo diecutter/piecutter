@@ -12,35 +12,43 @@ the template engine.
 Example
 *******
 
-.. code-block:: pycon
+Let's import ``piecutter`` and initialize data, as a dictionary:
 
-   >>> from __future__ import print_function
-   >>> import piecutter
+>>> from __future__ import print_function
+>>> import piecutter
 
-   >>> data = {'who': 'world'}
+>>> data = {'who': 'world'}
 
-   >>> renderer = piecutter.PythonFormatEngine()
-   >>> template = "Hello {who}!"
-   >>> print(renderer.render(template, data))
-   Hello world!
+Render text template against data using Python's builtin ``format()``:
 
-   >>> loader = piecutter.LocalLoader(root='../demo/')
-   >>> template = loader.load('hello.txt')
-   >>> print(template)
-   Hello {who}!
-   <BLANKLINE>
-   >>> print(renderer.render(template, data))
-   Hello world!
+>>> render = piecutter.PythonFormatEngine()
+>>> template = "Hello {who}!"
+>>> print(render(template, data))
+Hello world!
 
-   >>> cutter = piecutter.Cutter(
-   ...     loader=piecutter.HttpLoader(),
-   ...     renderer=piecutter.PythonFormatEngine(),
-   ...     writer=piecutter.StreamWriter(),
-   ... )
-   >>> cutter.render(
-   ...     'https://raw.github.com/diecutter/piecutter/master/demo/hello.txt',
-   ...     data)
-   Hello world!
+Templates can be loaded from custom locations. Let's load a file:
+
+>>> loader = piecutter.LocalLoader(root='../demo/')
+>>> with loader.open('hello.txt') as template:
+...     print(template)
+...     print(render(template, data))    
+Hello {who}!
+<BLANKLINE>
+Hello world!
+<BLANKLINE>
+
+Full rendering pipeline is configurable. In the following example, let's render
+a template loaded from the internet and send output to standard output stream:
+
+>>> render = piecutter.Cutter(
+...     loader=piecutter.HttpLoader(),
+...     engine=piecutter.PythonFormatEngine(),
+...     writer=piecutter.StreamWriter(),
+... )
+>>> render(
+...     'https://raw.github.com/diecutter/piecutter/cutter-api-reloaded/demo/hello.txt',
+...     data)
+Hello world!
 
 
 ************
