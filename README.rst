@@ -16,24 +16,25 @@ Let's import ``piecutter`` and initialize data, as a dictionary:
 
 >>> from __future__ import print_function
 >>> import piecutter
+>>> data = {u'who': u'world'}
 
->>> data = {'who': 'world'}
-
-Render text template against data using Python's builtin ``format()``:
+Render text template against data using Python's format:
 
 >>> render = piecutter.PythonFormatEngine()
->>> template = "Hello {who}!"
->>> print(render(template, data))
+>>> template = u"Hello {who}!"
+>>> output = render(template, data)
+>>> print(output)
 Hello world!
 
 Templates can be loaded from custom locations. Let's load a file:
 
->>> loader = piecutter.LocalLoader(root='../demo/')
->>> with loader.open('hello.txt') as template:
+>>> load = piecutter.LocalLoader(root=u'../demo/')
+>>> with load(u'hello.txt') as template:
 ...     print(template)
-...     print(render(template, data))    
+...     output = render(template, data)
 Hello {who}!
 <BLANKLINE>
+>>> print(output)
 Hello world!
 <BLANKLINE>
 
@@ -46,7 +47,7 @@ a template loaded from the internet and send output to standard output stream:
 ...     writer=piecutter.StreamWriter(),
 ... )
 >>> render(
-...     'https://raw.github.com/diecutter/piecutter/cutter-api-reloaded/demo/hello.txt',
+...     u'https://raw.github.com/diecutter/piecutter/cutter-api-reloaded/demo/hello.txt',
 ...     data)
 Hello world!
 

@@ -2,34 +2,55 @@
 Overview
 ########
 
-This document describes `piecutter`'s concepts and main features.
+This document introduces `piecutter`'s concepts and main features.
 See also :doc:`/about/vision`.
+
+.. testsetup::
+
+   from __future__ import print_function
+
+
+****************
+Import piecutter
+****************
+
+Provided :doc:`piecutter is installed </install>`, let's import ``piecutter``
+library:
 
 .. doctest::
 
    >>> import piecutter  # All-in-one API.
-   >>> data = {'who': 'world'}  # Prepare data as a dictionary.
 
 
 *********
 Renderers
 *********
 
-:doc:`Renderers </renderers>` are the core feature of `piecutter`. They use
+:doc:`Renderers </renderers>` are the core components of `piecutter`. They use
 template engines to generate output using templates and context data.
 
-Renderers typically are classes that implement a ``render(template, context)``
-method which generates output.
+Renderers are callables that accept template and data as input then return
+generated output.
 
-`piecutter` supports several template engines with a single API:
+.. doctest::
 
-* Python's builtin string format
-* Jinja2
-* Django
-* ... and all you can implement!
+   >>> render = piecutter.PythonFormatEngine()
+   >>> output = render(u'Hello {who}!', {u'who': u'world'})
+   >>> print(output)
+   Hello world!
 
-`piecutter` also provides a special engine that guesses the adequate template
-engine based on the content of the template.
+`piecutter`'s initial concept is to provide a single API to handle multiple
+template engines. `piecutter`'s core currently supports the following
+third-party engines:
+
+* `Python's builtin string format`_;
+* `Jinja2`_;
+* `Django`_.
+
+Of course, you can implement custom renderers.
+
+`piecutter` also provides a special renderer that tries to guess the engine
+based on the content of the template.
 
 Learn more in :doc:`/renderers`.
 
@@ -40,43 +61,22 @@ Loaders
 
 :doc:`Loaders </loaders>` load :doc:`templates </templates>`.
 
-Loaders typically are classes that define a ``load(location)`` method. This
-method returns a template object.
+Loaders are callables that accept location as input argument then return a
+template object.
+
+.. doctest::
+
+   >>> load = piecutter.LocalLoader(root=u'../demo')
+   >>> with load(u'hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
 
 `piecutter` provides builtin support for various locations:
 
-* files on local filesystem:
-
-  .. doctest::
-
-     >>> loader = piecutter.LocalLoader(root='../demo')
-     >>> with loader.open('hello.txt') as template:
-     ...     print(template)
-     Hello {who}!
-     <BLANKLINE>
-
-* remote files over HTTP:
-
-  .. doctest::
-
-     >>> loader = piecutter.HttpLoader()
-     >>> location = 'https://raw.githubusercontent.com' \
-     ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
-     >>> with loader.open(location) as template:
-     ...     print(template)
-     {{ greetings|default('Hello') }} {{ name }}!
-     <BLANKLINE>
-
-* remote files on Github:
-
-  .. code:: pycon
-
-     >>> loader = piecutter.GithubLoader()
-     >>> location = 'diecutter/piecutter/master/demo/hello.txt'
-     >>> with loader.open(location) as template:
-     ...     print(template)
-     Hello {who}!
-     <BLANKLINE>
+* files on local filesystem;
+* remote files over HTTP;
+* remote files on Github.
 
 Of course, you can write your own loaders!
 
@@ -97,7 +97,7 @@ Templates can represent either single units (files) or collections
 
 .. doctest::
 
-   >>> render = piecutter.PythonFormatEngine()  # Tip: renderers are callables.
+   >>> render = piecutter.PythonFormatEngine() 
 
    >>> print(render('Hello {who}!', {'who': 'world'}))
    Hello world!
@@ -112,7 +112,12 @@ Data
 ****
 
 `piecutter` uses mappings as context data. Any dictionary-like object can be
-used. See :doc:`context` for details.
+used.
+
+During rendering, additional contextual data is added to the original, such as
+``piecutter.engine``, which represents template engine name.
+
+See :doc:`context` for details.
 
 
 *******
@@ -186,3 +191,13 @@ template engine is called, context data is updated with some `piecutter`'s
 internals... Everywhere processing could be done by either one or several
 functions, you can use dispatchers: they look like one function but encapsulate
 several calls.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`Python's builtin string format`:
+   https://docs.python.org/2.7/library/string.html#formatstrings
+.. _`Jinja2`: http://jinja.pocoo.org/
+.. _`Django`: https://docs.djangoproject.com/en/1.8/topics/templates/

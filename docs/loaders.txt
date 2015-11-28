@@ -4,6 +4,12 @@ Loaders
 
 This document describes usage for `piecutter`'s loaders.
 
+Loaders are callables that accept location as input argument then return a
+template object.
+
+Within `piecutter`'s implementation, loaders typically are classes that
+inherit from ``piecutter.Loader`` and override ``open(location)`` method.
+
 
 ************************************
 Load templates from local filesystem
@@ -14,14 +20,14 @@ You can load local files:
 .. doctest::
 
    >>> import piecutter
-   >>> loader = piecutter.LocalLoader(root='../demo')
+   >>> load = piecutter.LocalLoader(root='../demo')
 
-   >>> with loader.open('hello.txt') as template:
+   >>> with load('hello.txt') as template:
    ...     print(template)
    Hello {who}!
    <BLANKLINE>
 
-   >>> with loader.open('i-dont-exist.txt') as template:  # Doctest: +ELLIPSIS
+   >>> with load('i-dont-exist.txt') as template:  # Doctest: +ELLIPSIS
    ...     print(template)
    Traceback (most recent call last):
      ...
@@ -32,9 +38,9 @@ And local directories:
 .. doctest::
 
    >>> import piecutter
-   >>> loader = piecutter.LocalLoader(root='../demo')
+   >>> load = piecutter.LocalLoader(root='../demo')
 
-   >>> with loader.open('.') as template:
+   >>> with load('.') as template:
    ...     print(template)
    [{"template": "hello.txt"}]
 
@@ -47,9 +53,9 @@ Load files on github.com
 
    >>> from piecutter.utils.files import temporary_directory
    >>> with temporary_directory() as checkout_dir:
-   ...     loader = piecutter.GithubLoader(checkout_dir)
+   ...     load = piecutter.GithubLoader(checkout_dir)
    ...     try:
-   ...         template = loader.open(
+   ...         template = load(
    ...             'diecutter/diecutter/0.7/demo/templates/greetings.txt')
    ...         print(template)
    ...     finally:
@@ -64,10 +70,10 @@ Load files over HTTP
 
 .. doctest::
 
-   >>> loader = piecutter.HttpLoader()
+   >>> load = piecutter.HttpLoader()
    >>> location = 'https://raw.githubusercontent.com' \
    ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
-   >>> with loader.open(location) as template:
+   >>> with load(location) as template:
    ...     print(template)
    {{ greetings|default('Hello') }} {{ name }}!
    <BLANKLINE>

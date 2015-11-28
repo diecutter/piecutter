@@ -20,3 +20,7 @@ class Loader(object):
     def open(self, location):
         """Return template object from location."""
         raise NotImplementedError()
+
+    def __call__(self, location):
+        """Return template object from location."""
+        return self.open(location)

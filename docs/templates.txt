@@ -8,7 +8,7 @@ This document describes `piecutter`'s template objects and their usage.
 
 `piecutter` handles two types of templates:
 
-* files: they are rendered as single units.
+* files: they are rendered as single units;
 * directories: they are rendered as collections of files.
 
 
