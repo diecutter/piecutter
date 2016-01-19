@@ -104,7 +104,13 @@ class Jinja2Engine(Engine):
         except TemplateSyntaxError as e:
             raise TemplateError(e)
         try:
-            return template.render(**context)
+            output = template.stream(**context)
+
+            def read_output():
+                return u''.join(output)
+
+            output.read = read_output
+            return output
         except (UndefinedError, TypeError) as e:
             raise TemplateError(e)
 
@@ -124,11 +130,12 @@ class Jinja2Engine(Engine):
         0.9
 
         """
+        content = template.read()
         # Try to locate a root variable in template.
-        if template.startswith('{# Jinja2 #}'):
+        if content.startswith('{# Jinja2 #}'):
             return 1.0
-        if template.startswith('{# Jinja2 -#}'):
+        if content.startswith('{# Jinja2 -#}'):
             return 1.0
-        if re.search(r'{{ .+ }}', template):
+        if re.search(r'{{ .+ }}', content):
             return 0.9
         return 0.0

@@ -29,14 +29,14 @@ Renderers
 :doc:`Renderers </renderers>` are the core components of `piecutter`. They use
 template engines to generate output using templates and context data.
 
-Renderers are callables that accept template and data as input then return
-generated output.
+Renderers are callables that accept `template <templates>`_ and `data <data>`_
+as input then return generated output.
 
 .. doctest::
 
    >>> render = piecutter.PythonFormatEngine()
    >>> output = render(u'Hello {who}!', {u'who': u'world'})
-   >>> print(output)
+   >>> print(output.read())
    Hello world!
 
 `piecutter`'s initial concept is to provide a single API to handle multiple
@@ -93,18 +93,93 @@ Templates
 Templates can represent either single units (files) or collections
 (directories).
 
-`piecutter` can render text, files or special ``Template`` objects:
+`piecutter` considers text, file wrapper and :class:`Template` as single units.
+They are rendered as file-like object:
 
 .. doctest::
 
    >>> render = piecutter.PythonFormatEngine() 
 
-   >>> print(render('Hello {who}!', {'who': 'world'}))
+   >>> output = render('Hello {who}!', {'who': 'world'})
+   >>> print(u''.join(list(output))
    Hello world!
 
    >>> from StringIO import StringIO
-   >>> print(render(StringIO(u'Hello {who}!'), {'who': 'world'}))
+   >>> output = render(StringIO(u'Hello {who}!'), {'who': 'world'})
+   >>> print(u''.join(list(output))
    Hello world!
+
+`piecutter` considers iterables (``collections.abc.Iterable``), except files,
+as collections:
+
+.. doctest::
+
+   >>> template = piecutter.SmartTemplate(u'Just text')
+   >>> template.is_file
+   True
+   >>> template = piecutter.SmartTemplate([u'list', u'of', u'files'])
+   >>> template.is_file
+   False
+   >>> template.is_directory
+   True
+
+Loaders make the difference between single units and collections:
+
+.. doctest::
+
+   >>> load = piecutter.LocalLoader(root=u'../demo')
+   >>> with load(u'hello.txt') as template:
+   ...     template.is_file
+   True
+   >>> with load(u'/') as template:
+   ...     template.is_directory
+   True
+
+Collections are rendered as generator of arguments to render single units.
+
+Here is a basic example where we render a list of templates with one dataset:
+
+.. doctest::
+
+   >>> render = piecutter.PythonFormatEngine()
+   >>> template = [u'hello-{who}.txt', u'goodbye-{who}.txt']
+   >>> output = render(template, {u'who': u'world'})
+   >>> for item in output:
+   ...     print(output)
+   {u'data': {u'who': u'world'}, u'template': u'hello-world.txt'}
+   {u'data': {u'who': u'world'}, u'template': u'goodbye-world.txt'}
+
+So, given :class:`piecutter.LocalLoader` loads directories as collections...
+
+.. doctest::
+
+   >>> load = piecutter.LocalLoader(root=u'../demo')
+   >>> with load(u'/') as template:
+   ...     print template
+   hello.txt
+   {name}.txt
+
+... we can generate the list of single templates in directory:
+
+   >>> for item in output:
+   >>> with load(u'/') as template:
+   ...     for item in render(template, {u'name': u'piecutter'}):
+   ...         print(item)
+   {u'data': {u'name': u'piecutter'}, u'template': {u'hello.txt'}}
+   {u'data': {u'name': u'piecutter'}, u'template': {u'piecutter.txt'}}
+
+`Cutters` do this job for you: they use this feature to dynamically render
+directories, then generate output for each file in directory.
+
+>>> template = load(u'/')
+>>> data = {u'name': u'piecutter'}
+>>> for output in render(template, data):
+...     print('# {name}'.format(name=output.name)
+...     print(u''.join(output))
+# hello.txt
+Hello world!
+# world.txt
+Whatever the content.
 
 
 ****

@@ -27,8 +27,11 @@ from piecutter.templates import Template, FileTemplate, TextTemplate  # NoQA
 from piecutter.templates import DirectoryTemplate  # NoQA
 from piecutter.templates import SmartTemplate, guess_template  # NoQA
 # Loaders.
-from piecutter.loaders.local import LocalLoader  # NoQA
+from piecutter.loaders import Loader  # NoQA
+from piecutter.loaders.github import GithubLoader  # NoQA
 from piecutter.loaders.http import HttpLoader  # NoQA
+from piecutter.loaders.local import LocalLoader  # NoQA
+from piecutter.loaders.proxy import TextLoader, FileObjLoader, ProxyLoader  # NoQA
 # Cutters.
 from piecutter.cutter import Cutter  # NoQA
 # Template engines.
@@ -37,7 +40,9 @@ from piecutter.engines.django import DjangoEngine  # NoQA
 from piecutter.engines.filename import FilenameEngine  # NoQA
 from piecutter.engines.jinja import Jinja2Engine  # NoQA
 from piecutter.engines.pythonformat import PythonFormatEngine  # NoQA
-from piecutter.engines.smart import SmartEngine  # NoQA
+from piecutter.engines.proxy import ProxyEngine  # NoQA
 # Writers.
 from piecutter.writers import Writer  # NoQA
+from piecutter.writers import PrintWriter  # NoQA
 from piecutter.writers import StreamWriter  # NoQA
+from piecutter.writers import TransparentWriter  # NoQA

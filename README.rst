@@ -8,6 +8,25 @@ Leitmotiv: **render templates against data**, wherever the templates, whatever
 the template engine.
 
 
+********
+Abstract
+********
+
+`piecutter` implements the ``render(template, data)`` pattern:
+
+* ``template`` can be text, file, directory, ... It can live in memory, on
+  local filesystem, on remote locations, ... And whatever the template
+  language;
+
+* ``data`` is any dictionary-like (i.e. mapping) object;
+
+* ``render`` encapsulates loading template, rendering template against data,
+  and post-processing output. Each part of the pipeline is configurable.
+
+`piecutter`'s challenge is to provide dead-simple defaults to cover most
+use-cases, and configurable objects to cover specific situations.
+
+
 *******
 Example
 *******
@@ -18,38 +37,108 @@ Let's import ``piecutter`` and initialize data, as a dictionary:
 >>> import piecutter
 >>> data = {u'who': u'world'}
 
-Render text template against data using Python's format:
+Let's render text template:
 
->>> render = piecutter.PythonFormatEngine()
->>> template = u"Hello {who}!"
+>>> template = u'Hello {who}!'
+>>> render = piecutter.Cutter()
 >>> output = render(template, data)
->>> print(output)
+>>> print(output.read())
 Hello world!
 
-Templates can be loaded from custom locations. Let's load a file:
+By default, ``piecutter.Cutter`` uses Python format. But it also supports other
+template engines, such as Jinja2:
 
->>> load = piecutter.LocalLoader(root=u'../demo/')
->>> with load(u'hello.txt') as template:
-...     print(template)
+>>> template = u'Hello {{ who }}!'
+>>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
+>>> output = render(template, data)
+>>> print(output.read())
+Hello world!
+
+`piecutter` has builtin support for the following template engines: Python
+format, Jinja2, Django. And feel free to add support for additional ones:
+`piecutter` has been developed with extensibility in mind!
+
+There is also a special engine that guesses the best engine to use depending on
+the template's name, content and context.
+
+Templates can be loaded from various locations. The examples above show text
+templates. Here is another example using a file object:
+
+>>> render.engine = piecutter.PythonFormatEngine()  # Restore initial engine.
+>>> with open('demo/hello.txt') as template:
 ...     output = render(template, data)
-Hello {who}!
-<BLANKLINE>
->>> print(output)
+...     print(output.read())
 Hello world!
 <BLANKLINE>
 
-Full rendering pipeline is configurable. In the following example, let's render
-a template loaded from the internet and send output to standard output stream:
+Here is another example using a local file:
 
->>> render = piecutter.Cutter(
-...     loader=piecutter.HttpLoader(),
-...     engine=piecutter.PythonFormatEngine(),
-...     writer=piecutter.StreamWriter(),
-... )
->>> render(
-...     u'https://raw.github.com/diecutter/piecutter/cutter-api-reloaded/demo/hello.txt',
-...     data)
+>>> template = u'file://demo/hello.txt'
+>>> output = render(template, data)
+>>> print(output.read())
 Hello world!
+<BLANKLINE>
+
+And another example using a remote template over HTTP:
+
+>>> template = u'https://raw.github.com/diecutter/piecutter/' \
+...            u'cutter-api-reloaded/demo/hello.txt'
+>>> output = render(template, data)
+>>> print(output.read())
+Hello world!
+<BLANKLINE>
+
+Full rendering pipeline is configurable through loaders, engines and writers.
+The ``piecutter.Cutter`` encapsulates such components:
+
+>>> render  # doctest: +ELLIPSIS
+<piecutter.cutter.Cutter object at 0x...>
+>>> render.loader  # doctest: +ELLIPSIS
+<piecutter.loaders.proxy.ProxyLoader object at 0x...>
+>>> render.engine  # doctest: +ELLIPSIS
+<piecutter.engines.pythonformat.PythonFormatEngine object at 0x...>
+>>> render.writer  # doctest: +ELLIPSIS
+<piecutter.writers.TransparentWriter object at 0x...>
+
+With ``piecutter.Cutter``'s default setup, files are rendered as file-like
+objects, so that you can iterate over content.
+
+Collections of templates, a.ka. directories, are also supported. By default,
+they are rendered as generator of multiple file-like objects. As an example,
+let's inspect the "demo/" directory we are about to render:
+
+>>> import os
+>>> print(sorted(os.listdir('demo/')))
+['hello.txt', '{who}.txt']
+
+When we render the directory, we get a generator:
+
+>>> output = render(u'file://demo/', data)
+>>> output  # doctest: +ELLIPSIS
+<generator object ... at 0x...>
+
+Each file is rendered as a file-like object.
+The first one is our previous "hello.txt" example:
+
+>>> item = output.next()
+>>> print(item.name)
+hello.txt
+>>> print(item.read())
+Hello world!
+<BLANKLINE>
+
+The second one has a dynamic name:
+
+>>> item = output.next()
+>>> print(item.name)
+world.txt
+>>> print(item.read())
+Whatever the content.
+<BLANKLINE>
+
+
+
+
 
 
 ************

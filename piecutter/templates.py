@@ -39,6 +39,11 @@ class DirectoryTemplate(Template):
     """Collection of single templates, as a directory."""
     is_file = False
 
+    def __init__(self, name=None):
+        """Constructor."""
+        #: Name.
+        self.name = name
+
     @property
     def content_type(self):
         return 'text/directory'
@@ -58,7 +63,7 @@ class DirectoryTemplate(Template):
 
     def __iter__(self):
         """Iterate over template contents."""
-        for template in self.read_tree():
+        for template in self.read():
             yield template
 
 
@@ -85,12 +90,28 @@ class TextTemplate(SingleTemplate):
 
 class FileTemplate(SingleTemplate):
     """Template initialized with a file-like object."""
-    def __init__(self, template=None, name=None):
+    def __init__(self, template=None, name=None, location=None):
         """Constructor."""
         #: File-like object.
         self.file = template
+
         #: Name.
         self.name = name
+        if self.name is None:
+            try:
+                self.name = self.file.name
+            except AttributeError:
+                pass
+
+        #: Location on storage (typically filesystem).
+        self.location = location
+
+    def open(self, mode='rb'):
+        if self.file:
+            return self.file.open(mode)
+        elif self.location:
+            self.file = self.location.open(mode)
+            return self.file
 
     def read(self):
         return self.file.read()

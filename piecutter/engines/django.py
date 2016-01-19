@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Django template engine."""
 from __future__ import absolute_import  # Remove ambiguity of ``import django``
+from io import StringIO
 import re
 
 from django.conf import settings
@@ -9,7 +10,13 @@ from django.template import Template, Context, TemplateSyntaxError
 from piecutter.engines import Engine
 from piecutter.exceptions import TemplateError
 
-settings.configure()
+
+settings.configure(LOGGING_CONFIG={})
+
+
+import django
+
+django.setup()
 
 
 class DjangoEngine(Engine):
@@ -19,7 +26,9 @@ class DjangoEngine(Engine):
         context.setdefault('piecutter', {})
         context['piecutter']['engine'] = 'django'
         try:
-            return Template(template).render(Context(context))
+            output = Template(template).render(Context(context))
+            output = StringIO(output)
+            return output
         except TemplateSyntaxError as e:
             raise TemplateError(e)
 
@@ -37,9 +46,10 @@ class DjangoEngine(Engine):
         0.9
 
         """
+        content = template.read()
         # Try to locate a root variable in template.
-        if template.startswith('{# Django #}'):
+        if content.startswith('{# Django #}'):
             return 1.0
-        if re.search(r'{{ .+ }}', template):
+        if re.search(r'{{ .+ }}', content):
             return 0.9
         return 0.0

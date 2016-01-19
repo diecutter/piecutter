@@ -1,41 +1,30 @@
 # -*- coding: utf-8 -*-
 """Template engine using Python's builtin string format."""
 import re
+from cStringIO import StringIO
 
 import piecutter
 from piecutter.engines import Engine
+from piecutter.files import VirtualFile
 
 
 class PythonFormatEngine(Engine):
     """Template engine using Python's builtin string format."""
-    def render(self, template, context):
-        context.setdefault('piecutter', {})
-        context['piecutter']['engine'] = 'pythonformat'
+    code = u'pythonformat'
+
+    def render(self, template, data):
+        data.setdefault('piecutter', {})
+        data['piecutter']['engine'] = self.code
         template = piecutter.guess_template(template)
-        if template.is_file:
-            return self.render_file(template, context)
-        else:
-            return self.render_directory(template, context)
-
-    def render_file(self, template, context):
-        """Return the rendered template against context.
-
-        >>> engine = PythonFormatEngine()
-        >>> engine.render('Hello {who}!', {'who': 'world'})
-        'Hello world!'
-
-        """
         try:
             template.seek(0)
         except (AttributeError, NotImplementedError):
             pass
-        return template.read().format(**context)
+        content = template.read()
+        output = content.format(**data)
+        return VirtualFile(file=StringIO(output))
 
-    def render_directory(self, template, context):
-        for sub_template in template.read_tree():
-            yield sub_template
-
-    def match(self, template, context):
+    def match(self, template, data):
         """Return a ratio showing whether template looks like using engine.
 
         >>> engine = PythonFormatEngine()
@@ -45,7 +34,8 @@ class PythonFormatEngine(Engine):
         0.9
 
         """
+        content = template.read()
         # Try to locate a root variable in template.
-        if re.search(r'{.+}', template):
+        if re.search(r'{.+}', content):
             return 0.9
         return 0.0

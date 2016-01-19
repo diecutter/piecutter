@@ -14,6 +14,12 @@ class Writer(object):
         return self.write(*args, **kwargs)
 
 
+class TransparentWriter(Writer):
+    """A writer that just returns input as output."""
+    def write(self, content):
+        return content
+
+
 class StreamWriter(Writer):
     def __init__(self, stream=None):
         if stream is None:
@@ -21,7 +27,7 @@ class StreamWriter(Writer):
         self.stream = stream
 
     def write(self, content):
-        self.stream.write(content)
+        self.stream.writelines(content)
 
 
 class PrintWriter(Writer):
