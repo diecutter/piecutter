@@ -117,16 +117,17 @@ class Jinja2Engine(Engine):
     def match(self, template, context):
         """Return a ratio showing whether template looks like using engine.
 
+        >>> from piecutter import TextTemplate
         >>> engine = Jinja2Engine()
-        >>> engine.match('', {})
+        >>> engine.match(TextTemplate(''), {})
         0.0
-        >>> engine.match('{# Jinja2 #}', {})
+        >>> engine.match(TextTemplate('{# Jinja2 #}'), {})
         1.0
-        >>> engine.match('{# Jinja2 -#}', {})
+        >>> engine.match(TextTemplate('{# Jinja2 -#}'), {})
         1.0
-        >>> engine.match('Not shebang {# Jinja2 #}', {})
+        >>> engine.match(TextTemplate('Not shebang {# Jinja2 #}'), {})
         0.0
-        >>> engine.match('{{ key }}', {})
+        >>> engine.match(TextTemplate('{{ key }}'), {})
         0.9
 
         """

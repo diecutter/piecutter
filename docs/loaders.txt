@@ -2,25 +2,36 @@
 Loaders
 #######
 
-This document describes usage for `piecutter`'s loaders.
+`piecutter`'s loaders are callables that accept location as input argument then
+return a template object.
 
-Loaders are callables that accept location as input argument then return a
-template object.
+.. doctest::
+
+   >>> import piecutter
+   >>> load = piecutter.LocalLoader(root=u'demo')
+   >>> with load(u'hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
 
 Within `piecutter`'s implementation, loaders typically are classes that
-inherit from ``piecutter.Loader`` and override ``open(location)`` method.
+inherit from ``piecutter.Loader`` and override some methods:
+
+* ``open(location)`` returns a template object.
+* ``tree_template(location)`` returns a dynamic tree template, if it exists.
+* ``tree(location)`` statically lists the files in a directory.
 
 
-************************************
-Load templates from local filesystem
-************************************
+***********
+LocalLoader
+***********
 
 You can load local files:
 
 .. doctest::
 
    >>> import piecutter
-   >>> load = piecutter.LocalLoader(root='../demo')
+   >>> load = piecutter.LocalLoader(root='demo')
 
    >>> with load('hello.txt') as template:
    ...     print(template)
@@ -38,16 +49,29 @@ And local directories:
 .. doctest::
 
    >>> import piecutter
-   >>> load = piecutter.LocalLoader(root='../demo')
+   >>> load = piecutter.LocalLoader(root='demo')
+   >>> print(load.tree('.'))
+   [[u'hello.txt', {}, u'hello.txt'], [u'{who}.txt', {}, u'{who}.txt']]
 
-   >>> with load('.') as template:
+
+**********
+HttpLoader
+**********
+
+.. doctest::
+
+   >>> load = piecutter.HttpLoader()
+   >>> location = 'https://raw.githubusercontent.com' \
+   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> with load(location) as template:
    ...     print(template)
-   [{"template": "hello.txt"}]
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>
 
 
-************************
-Load files on github.com
-************************
+************
+GithubLoader
+************
 
 .. code-block:: pycon
 
@@ -60,20 +84,5 @@ Load files on github.com
    ...         print(template)
    ...     finally:
    ...         template.close()
-   {{ greetings|default('Hello') }} {{ name }}!
-   <BLANKLINE>
-
-
-********************
-Load files over HTTP
-********************
-
-.. doctest::
-
-   >>> load = piecutter.HttpLoader()
-   >>> location = 'https://raw.githubusercontent.com' \
-   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
-   >>> with load(location) as template:
-   ...     print(template)
    {{ greetings|default('Hello') }} {{ name }}!
    <BLANKLINE>

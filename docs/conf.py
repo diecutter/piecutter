@@ -39,9 +39,10 @@ author_slug = re.sub(r'([\w_.-]+)', u'-', author)
 # built documents.
 configuration_dir = os.path.dirname(__file__)
 documentation_dir = configuration_dir
+project_dir = os.path.dirname(documentation_dir)
 version_file = os.path.normpath(os.path.join(
-    documentation_dir,
-    '../VERSION'))
+    project_dir,
+    'VERSION'))
 
 # The full version, including alpha/beta/rc tags.
 release = open(version_file).read().strip()
@@ -135,3 +136,22 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+# -- Options for Doctest extension --------------------------------------------
+doctest_global_setup = """
+from __future__ import print_function
+import os
+
+from piecutter.utils.files import temporary_directory
+
+
+former_dir = os.getcwd()
+os.chdir(os.path.dirname(former_dir))
+temp_dir_context = temporary_directory()
+temp_dir = temp_dir_context.__enter__()
+"""
+doctest_global_cleanup = """
+temp_dir_context.__exit__()
+os.chdir(former_dir)
+"""

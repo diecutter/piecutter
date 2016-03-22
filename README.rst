@@ -8,78 +8,56 @@ Leitmotiv: **render templates against data**, wherever the templates, whatever
 the template engine.
 
 
+************
+Key features
+************
+
+**Simple API**: ``render(template, data)``.
+
+**Renders files** (single templates) **and directories** (collections of
+templates).
+
+**Multiple template engines**: `Python's format()`_, `Jinja2`_ and `Django`_...
+Additional engines such as `Cheetah`_ or non-Python template engines such as
+Ruby's `ERB`_ could be supported.
+
+**Extensible template loading**: local filesystem, HTTP, github.com...
+Additional storages could be supported.
+
+**Configurable post-processing**: write to local filesystem, generate an
+archive... It's easy to create your own.
+
+**Dynamic directory generation**: generate one template multiple times with
+different data, exclude some files depending on context, include external
+locations, use several template engines...
+
+
 ********
-Abstract
+Examples
 ********
 
-`piecutter` implements the ``render(template, data)`` pattern:
+Hello world!
+============
 
-* ``template`` can be text, file, directory, ... It can live in memory, on
-  local filesystem, on remote locations, ... And whatever the template
-  language;
-
-* ``data`` is any dictionary-like (i.e. mapping) object;
-
-* ``render`` encapsulates loading template, rendering template against data,
-  and post-processing output. Each part of the pipeline is configurable.
-
-`piecutter`'s challenge is to provide dead-simple defaults to cover most
-use-cases, and configurable objects to cover specific situations.
-
-
-*******
-Example
-*******
-
-Let's import ``piecutter`` and initialize data, as a dictionary:
-
->>> from __future__ import print_function
 >>> import piecutter
->>> data = {u'who': u'world'}
-
-Let's render text template:
-
 >>> template = u'Hello {who}!'
+>>> data = {u'who': u'world'}
 >>> render = piecutter.Cutter()
 >>> output = render(template, data)
 >>> print(output.read())
 Hello world!
 
-By default, ``piecutter.Cutter`` uses Python format. But it also supports other
-template engines, such as Jinja2:
+`piecutter` has builtin support for the following template engines:
 
->>> template = u'Hello {{ who }}!'
->>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
->>> output = render(template, data)
->>> print(output.read())
-Hello world!
+* `Python's format()`_
+* `Jinja2`_
+* `Django`_.
 
-`piecutter` has builtin support for the following template engines: Python
-format, Jinja2, Django. And feel free to add support for additional ones:
-`piecutter` has been developed with extensibility in mind!
+Feel free to implement support for additional ones. Non-Python engines could be
+supported too!
 
-There is also a special engine that guesses the best engine to use depending on
-the template's name, content and context.
-
-Templates can be loaded from various locations. The examples above show text
-templates. Here is another example using a file object:
-
->>> render.engine = piecutter.PythonFormatEngine()  # Restore initial engine.
->>> with open('demo/hello.txt') as template:
-...     output = render(template, data)
-...     print(output.read())
-Hello world!
-<BLANKLINE>
-
-Here is another example using a local file:
-
->>> template = u'file://demo/hello.txt'
->>> output = render(template, data)
->>> print(output.read())
-Hello world!
-<BLANKLINE>
-
-And another example using a remote template over HTTP:
+Load remote file
+================
 
 >>> template = u'https://raw.github.com/diecutter/piecutter/' \
 ...            u'cutter-api-reloaded/demo/hello.txt'
@@ -88,108 +66,65 @@ And another example using a remote template over HTTP:
 Hello world!
 <BLANKLINE>
 
-Full rendering pipeline is configurable through loaders, engines and writers.
-The ``piecutter.Cutter`` encapsulates such components:
+`piecutter` can load templates from various locations :
 
->>> render  # doctest: +ELLIPSIS
-<piecutter.cutter.Cutter object at 0x...>
->>> render.loader  # doctest: +ELLIPSIS
-<piecutter.loaders.proxy.ProxyLoader object at 0x...>
->>> render.engine  # doctest: +ELLIPSIS
-<piecutter.engines.pythonformat.PythonFormatEngine object at 0x...>
->>> render.writer  # doctest: +ELLIPSIS
-<piecutter.writers.TransparentWriter object at 0x...>
+* Python builtins, such as text, bytes, file-like objects, ...
+* resources on local filesystem
+* remote resources over HTTP
+* remote resources on github.com.
+
+Feel free to implement support of additional loaders!
+
+Render directories
+==================
 
 With ``piecutter.Cutter``'s default setup, files are rendered as file-like
 objects, so that you can iterate over content.
 
 Collections of templates, a.ka. directories, are also supported. By default,
-they are rendered as generator of multiple file-like objects. As an example,
-let's inspect the "demo/" directory we are about to render:
+they are rendered as generator of file-like objects.
 
->>> import os
->>> print(sorted(os.listdir('demo/')))
-['hello.txt', '{who}.txt']
+Given the following directory:
 
-When we render the directory, we get a generator:
+.. code:: text
 
->>> output = render(u'file://demo/', data)
->>> output  # doctest: +ELLIPSIS
-<generator object ... at 0x...>
+   demo/
+   ├── hello.txt  # Contains "Hello {who}!\n"
+   └── {who}.txt  # Contains "Whatever the content.\n"
 
-Each file is rendered as a file-like object.
-The first one is our previous "hello.txt" example:
+When we render the directory, we can iterate each generated item and use their
+``name`` attribute and ``read()`` method:
 
->>> item = output.next()
->>> print(item.name)
-hello.txt
->>> print(item.read())
-Hello world!
+>>> for item in render(u'file://demo/', data):
+...     print('Name: {}'.format(item.name))
+...     print('Content: {}'.format(item.read()))
+Name: hello.txt
+Content: Hello world!
+<BLANKLINE>
+Name: world.txt
+Content: Whatever the content.
 <BLANKLINE>
 
-The second one has a dynamic name:
-
->>> item = output.next()
->>> print(item.name)
-world.txt
->>> print(item.read())
-Whatever the content.
-<BLANKLINE>
-
-
-
-
-
-
-************
-Key features
-************
-
-* Simple API: render templates against context.
-
-* Support multiple template engines: `Jinja2`_ and `Django`_ for now. Later:
-  `Cheetah`_ and even non-Python template engines such as Ruby's `ERB`_.
-
-* Render files and directories.
-
-* Load templates from almost everywhere: local filesystem and github.com for
-  now. Later: Django storages...
-
-* Do what you want with generated content: write to local filesystem, generate
-  an archive...
+Of course, you may want to write output to disk or to an archive. `piecutter`
+provides "writers" for that purpose!
 
 
 **************
 Project status
 **************
 
-`piecutter` is under active development.
-
 **Yesterday**, `piecutter` was the core of `diecutter`_.
 
 As `diecutter`'s authors, we think `diecutter` has great features related to
 templates and file generation. We wanted to share it with a larger audience.
-So we just packaged it as a standalone library.
-And we are planning to make it better as soon as possible.
-`Join us`_ if you like the features ;)
+So we just packaged it as a standalone library, and this is `piecutter`.
 
-Here are some of our motivations:
-
-* third-party projects can use `piecutter`. They do not have to depend on
-  `diecutter`, which embeds some specific code related to its web service.
-
-* as a standalone library, `piecutter` should be easier to maintain and
-  improve.
-
-* `piecutter` is more open than `diecutter`. It can have a larger community.
-  It also may converge with similar tools.
-
-**Today**, `piecutter` is tied to `diecutter` implementation. The API
-reflects `diecutter`'s architecture and concepts, which may sound obscure for
+In early versions, `piecutter` was tied to `diecutter` implementation. The API
+reflected `diecutter`'s architecture and concepts, which may sound obscure for
 other usage.
 
-**Tomorrow**, we are planning to improve `piecutter`. As an example, we think
-the API should be refactored, with simplicity in mind.
+**Today**, `piecutter`'s API has been refactored, with simplicity in mind,
+independantly from `diecutter`.
 
 
 *********
@@ -208,6 +143,8 @@ Resources
 .. _`Python`: https://www.python.org
 .. _`diecutter`: http://diecutter.io
 .. _`join us`: https://piecutter.readthedocs.org/en/latest/contributing.html
+.. _`Python's format()`:
+   https://docs.python.org/3/library/string.html#formatstrings
 .. _`Jinja2`: http://jinja.pocoo.org/
 .. _`Django`: https://www.djangoproject.com
 .. _`Cheetah`: http://pythonhosted.org/Cheetah/

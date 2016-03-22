@@ -340,9 +340,12 @@ class DirResourceTestCase(unittest.TestCase):
             resource = resources.DirResource(path=dir_path,
                                              engine=content_engine,
                                              filename_engine=filename_engine)
-            generate_content = lambda: [(filename, ''.join(content))
-                                        for (filename, content)
-                                        in resource.render(context)]
+
+            def generate_content():
+                return [(filename, ''.join(content))
+                        for (filename, content)
+                        in resource.render(context)]
+
             self.assertRaises(ValueError, generate_content)
         self.assertFalse(filename_engine.called)
 
@@ -389,8 +392,10 @@ class DirResourceTestCase(unittest.TestCase):
             resource = resources.DirResource(path=dir_path,
                                              engine=content_engine,
                                              filename_engine=filename_engine)
-            # Render.
-            generate_content = lambda: [(filename, ''.join(content))
-                                        for (filename, content)
-                                        in resource.render(context)]
+
+            def generate_content():
+                return [(filename, ''.join(content))
+                        for (filename, content)
+                        in resource.render(context)]
+
             self.assertRaises(TemplateError, generate_content)

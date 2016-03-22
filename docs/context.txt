@@ -30,10 +30,10 @@ And here is the expected output:
 .. doctest::
 
    >>> import piecutter
-   >>> cutter = piecutter.Cutter(engine=piecutter.Jinja2Engine())
-   >>> template = open('../tests/default_context.json').read()
+   >>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
+   >>> template = open('tests/default_context.json').read()
    >>> data = {}
-   >>> print(cutter.render(template, data))
+   >>> print(render(template, data).read())
    {
      "engine": "jinja2"
    }

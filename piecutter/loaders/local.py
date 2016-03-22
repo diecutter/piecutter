@@ -1,6 +1,4 @@
 import contextlib
-import functools
-import json
 import pathlib
 
 import piecutter
@@ -11,6 +9,7 @@ class LocalLoader(Loader):
     def __init__(self, root=u''):
         #: Limit loading to this directory.
         self.root = self._to_path(root)
+        self.root = self.root.resolve()
         if not self.root.is_dir():
             raise ValueError('Root "{0}" is not a directory'.format(self.root))
 
@@ -24,10 +23,12 @@ class LocalLoader(Loader):
         path = parts['path']
         path = self._to_path(path)
         tree_path = path / pathlib.Path('.directory-tree')
-        if parts['scheme']:
-            return u'://'.join([parts['scheme'], unicode(tree_path)])
-        else:
-            return tree_path
+        if tree_path.exists():
+            if parts['scheme']:
+                return u'://'.join([parts['scheme'], unicode(tree_path)])
+            else:
+                return tree_path
+        raise piecutter.TemplateNotFound(unicode(tree_path))
 
     def tree(self, location):
         parts = parse_location(location)

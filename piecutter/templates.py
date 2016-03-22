@@ -48,9 +48,6 @@ class DirectoryTemplate(Template):
     def content_type(self):
         return 'text/directory'
 
-    def read_tree(self):
-        """Generate list of paths to contained resources."""
-
     def read(self):
         """Return computed directory tree as json."""
         data = []

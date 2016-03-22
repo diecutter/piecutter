@@ -57,23 +57,26 @@ class Cutter(object):
 
     def render_directory(self, template, data):
         try:
+            # There is a dynamic tree template.
             tree_location = self.loader.tree_template(template.location)
             with self.open(tree_location) as tree_template:
                 encoded_tree = self.render_file(tree_template, data)
             tree = json.load(encoded_tree)
         except (AttributeError, piecutter.TemplateNotFound):
+            # There is no dynamic tree template.
             tree = self.loader.tree(template.location)
         for location, overrides, name in tree:
             rendered_name = self.render_file(name, data).read()
             local_data = data
             local_data.update(overrides)
-            result = self(location, local_data)
+            with self.open(location) as template:
+                result = self.render(template, local_data)
             setattr(result, 'name', rendered_name)
             yield result
 
     def write(self, content):
         """Process ``content``."""
-        return self.writer.write(content)
+        return self.writer(content)
 
     def __call__(self, location, data):
         """Process template at ``location`` with ``data``.

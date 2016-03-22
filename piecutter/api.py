@@ -43,6 +43,7 @@ from piecutter.engines.pythonformat import PythonFormatEngine  # NoQA
 from piecutter.engines.proxy import ProxyEngine  # NoQA
 # Writers.
 from piecutter.writers import Writer  # NoQA
+from piecutter.writers import FileWriter  # NoQA
 from piecutter.writers import PrintWriter  # NoQA
 from piecutter.writers import StreamWriter  # NoQA
 from piecutter.writers import TransparentWriter  # NoQA

@@ -4,12 +4,52 @@ Template objects
 
 .. py:module:: piecutter.templates
 
-This document describes `piecutter`'s template objects and their usage.
+`piecutter`'s templates are, basically, Python objects whose content can be
+read.
+
+
+***************************
+Single units VS collections
+***************************
 
 `piecutter` handles two types of templates:
 
 * files: they are rendered as single units;
 * directories: they are rendered as collections of files.
+
+:doc:`Loaders </loaders>` make the difference between single units and
+collections:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> load = piecutter.LocalLoader(root=u'demo')
+   >>> with load(u'hello.txt') as template:
+   ...     template.is_file
+   True
+   >>> with load(u'.') as template:
+   ...     template.is_dir
+   True
+
+`piecutter`'s default loader considers text (bytes, strings, text, unicode),
+file wrapper and :class:`Template` as single units.
+
+Single units are rendered as file-like object:
+
+.. doctest::
+
+   >>> render = piecutter.PythonFormatEngine()
+
+   >>> output = render('Hello {who}!', {'who': 'world'})
+   >>> print(output.read())
+   Hello world!
+
+   >>> from StringIO import StringIO
+   >>> output = render(StringIO(u'Hello {who}!'), {'who': 'world'})
+   >>> print(output.read())
+   Hello world!
+
+Collections are rendered as generator of file-like objects.
 
 
 *************************
@@ -38,7 +78,7 @@ You can create templates from file-like objects:
 
 .. doctest::
 
-   >>> with open('../demo/hello.txt') as template_file:
+   >>> with open('demo/hello.txt') as template_file:
    ...     template = piecutter.FileTemplate(template_file)
    ...     template  # Doctest: +ELLIPSIS
    ...     print(template)
@@ -57,7 +97,7 @@ locations:
 .. doctest::
 
    >>> import pathlib
-   >>> loader = piecutter.LocalLoader(root=pathlib.Path('../demo'))
+   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo'))
    >>> with loader.open('hello.txt') as template:
    ...     print(template)
    Hello {who}!
@@ -75,9 +115,9 @@ You can create templates from directories using loaders:
 
 .. doctest::
 
-   >>> with loader.open('.') as template:
-   ...     print(template)
-   [{"template": "hello.txt"}]
+   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo'))
+   >>> print(loader.tree('.'))
+   [[u'hello.txt', {}, u'hello.txt'], [u'{who}.txt', {}, u'{who}.txt']]
 
 
 *******************
@@ -90,7 +130,7 @@ Automatic detection
    >>> isinstance(template, piecutter.TextTemplate)
    True
 
-   >>> with open('index.txt') as template_file:
+   >>> with open('demo/hello.txt') as template_file:
    ...     template = piecutter.guess_template(template_file)
    ...     isinstance(template, piecutter.FileTemplate)
    True

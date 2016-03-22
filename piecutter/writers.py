@@ -1,5 +1,6 @@
 """Writers post-process the output of template rendering."""
 from __future__ import print_function
+import os
 import sys
 
 
@@ -32,4 +33,26 @@ class StreamWriter(Writer):
 
 class PrintWriter(Writer):
     def write(self, content):
-        print(content)
+        print(content.read())
+
+
+class FileWriter(Writer):
+    def __init__(self, target=None):
+        self.target = target
+        if self.target is None:
+            self.target = os.getcwd()
+
+    def write(self, content):
+        written = []
+        if hasattr(content, 'name'):
+            filename = os.path.join(self.target, content.name)
+            dirname = os.path.dirname(filename)
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            with open(filename, 'wb') as outfile:
+                outfile.write(content.read())
+                written.append(filename)
+        else:
+            for item in content:
+                written.extend(self.write(item))
+        return written

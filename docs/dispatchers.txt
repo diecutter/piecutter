@@ -29,7 +29,7 @@ FirstResultDispatcher
    >>> two = lambda x: 'two {thing}'.format(thing=x)
    >>> three = lambda x: 'three {thing}'.format(thing=x)
    >>> callable = dispatchers.FirstResultDispatcher([zero, one, two, three])
-   >>> print callable('sheep')
+   >>> print(callable('sheep'))
    two sheep
 
 
@@ -43,7 +43,7 @@ LastResultDispatcher
    >>> two = lambda x: 'two {thing}'.format(thing=x)
    >>> three = lambda x: 'three {thing}'.format(thing=x)
    >>> callable = dispatchers.LastResultDispatcher([zero, one, two, three])
-   >>> print callable('sheep')
+   >>> print(callable('sheep'))
    three sheep
 
 
@@ -57,5 +57,5 @@ ChainDispatcher
    >>> upper = lambda x: x.upper()
    >>> strong = lambda x: '<strong>{thing}</strong>'.format(thing=x)
    >>> callable = dispatchers.ChainDispatcher([strip, upper, strong])
-   >>> print callable('    sheep           ')
+   >>> print(callable('    sheep           '))
    <strong>SHEEP</strong>

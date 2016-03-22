@@ -2,11 +2,41 @@
 Cutters
 #######
 
-This document explains `piecutter`'s cutters.
+`piecutter`'s cutters encapsulate full template rendering workflow, from
+template loading to output post-processing, via template rendering of course.
 
-Cutters encapsulate full template rendering workflow, from template loading to
-output post-processing, via template rendering of course.
+
+********************
+Cutters are callable
+********************
 
 Cutters are callables that take ``location`` and ``data`` as input and write
-output somewhere. They typically are objects that can be configured using
-loaders, renderers, writers...
+output somewhere.
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.Cutter()
+   >>> output = render(u'Hello {who}!', {u'who': u'world'})
+   >>> print(output.read())
+   Hello world!
+
+
+************************
+Cutters are configurable
+************************
+
+Cutters are objects that can be configured with loaders, engines and writers.
+
+.. doctest::
+
+   >>> render = piecutter.Cutter(
+   ...     loader=piecutter.HttpLoader(),
+   ...     engine=piecutter.Jinja2Engine(),
+   ...     writer=piecutter.PrintWriter(),
+   ... )
+   >>> render(
+   ...     'https://raw.githubusercontent.com'
+   ...     '/diecutter/diecutter/0.7/demo/templates/greetings.txt',
+   ...     {'name': 'world'})
+   Hello world!

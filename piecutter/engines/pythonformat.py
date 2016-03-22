@@ -27,10 +27,11 @@ class PythonFormatEngine(Engine):
     def match(self, template, data):
         """Return a ratio showing whether template looks like using engine.
 
+        >>> from piecutter import TextTemplate
         >>> engine = PythonFormatEngine()
-        >>> engine.match('', {})
+        >>> engine.match(TextTemplate(''), {})
         0.0
-        >>> engine.match('{key}', {})
+        >>> engine.match(TextTemplate('{key}'), {})
         0.9
 
         """

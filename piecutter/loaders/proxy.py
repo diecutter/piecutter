@@ -46,6 +46,10 @@ class ProxyLoader(Loader):
             return parts['scheme'] if parts['scheme'] else 'text'
         if isinstance(location, file):
             return 'fileobj'
+        file_api_methods = ['read']
+        is_file = all([hasattr(location, attr) for attr in file_api_methods])
+        if is_file:
+            return 'fileobj'
         raise ValueError('Cannot guess adequate template loader.')
 
     def tree_template(self, location):
