@@ -102,10 +102,10 @@ Key features
 Resources
 *********
 
-* Documentation: https://piecutter.readthedocs.org
+* Documentation: https://piecutter.readthedocs.io
 * PyPI page: http://pypi.python.org/pypi/piecutter
 * Bugtracker: https://github.com/diecutter/piecutter/issues
-* Changelog: https://piecutter.readthedocs.org/en/latest/about/changelog.html
+* Changelog: https://piecutter.readthedocs.io/en/latest/about/changelog.html
 * Roadmap: https://github.com/diecutter/piecutter/issues/milestones
 * Code repository: https://github.com/diecutter/piecutter
 * Continuous integration: https://travis-ci.org/diecutter/piecutter
@@ -113,7 +113,7 @@ Resources
 
 .. _`Python`: https://python.org
 .. _`diecutter`: http://diecutter.io
-.. _`join us`: https://piecutter.readthedocs.org/en/latest/contributing.html
+.. _`join us`: https://piecutter.readthedocs.io/en/latest/contributing.html
 .. _`Jinja2`: http://jinja.pocoo.org/
 .. _`Django`: https://djangoproject.com
 .. _`Cheetah`: http://pythonhosted.org/Cheetah/
