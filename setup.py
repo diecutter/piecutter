@@ -35,7 +35,7 @@ VERSION = open(os.path.join(here, 'VERSION')).read().strip()
 AUTHOR = u'Rémy HUBSCHER'
 EMAIL = 'hubscher.remy@gmail.com'
 LICENSE = 'BSD'
-URL = 'https://{name}.readthedocs.org/'.format(name=NAME)
+URL = 'https://{name}.readthedocs.io/'.format(name=NAME)
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
