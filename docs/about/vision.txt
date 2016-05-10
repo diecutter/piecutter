@@ -15,14 +15,16 @@ Render template against data
 * you have a template. To its simplest expression, it is content with
   placeholders ;
 
-* you have data ;
+* you have data, typically a mapping ;
 
 * you want to render the template against the data.
 
-The important point here is that, as an user, you handle templates and data,
-whereas you do not want to bother with the rendering process. You expect
-`piecutter` to generate the content, whatever the template and the data you
-provide.
+The important point here is that, **as an user you want to focus on templates
+and data**, because they are your content, the bits that you own and manage.
+
+**As an user, you do not want to bother with the rendering process.** And that
+is `piecutter`'s primary goal: encapsulate content generation, whatever the
+template and the data you provide.
 
 
 **********************
@@ -30,7 +32,7 @@ Wherever the templates
 **********************
 
 Templates can theorically live anywhere: on local filesystem, on remote places,
-or they could be generated in some way... As a user, I do not want to bother
+or they could be generated in some way... As an user, I do not want to bother
 with template loading, I just want templates to be loaded and rendered against
 data.
 
@@ -60,7 +62,7 @@ Data is dictionary-like
 various locations. The `Python`_ language has nice libraries for that purpose.
 
 `piecutter` expects a structured data input, i.e. a dictionary-like object.
-That's enough.
+And it should be enough.
 
 
 ***********
