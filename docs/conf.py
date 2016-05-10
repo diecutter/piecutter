@@ -58,14 +58,25 @@ language = 'en'
 exclude_patterns = ['_build']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'friendly'
 
 
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'classic'
+html_theme_options = {
+    "stickysidebar": True,
+    "externalrefs": True,
+    "sidebarbgcolor": "#e9e9e9",
+    "sidebartextcolor": "#333",
+    "sidebarlinkcolor": "#666",
+    "relbarbgcolor": "#185A86",
+    "headtextcolor": "#185A86",
+    "footerbgcolor": "#092130",
+    "codebgcolor": "#fff9e5",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
