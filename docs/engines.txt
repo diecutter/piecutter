@@ -1,0 +1,95 @@
+#######
+Engines
+#######
+
+This document explains `piecutter`'s engines.
+
+.. testsetup::
+
+   from __future__ import print_function
+
+`piecutter`'s engines use third-party template engines to generate output using
+template and data.
+
+Engines are callables that accept ``template, data`` as input then return
+generated output as an iterable file-like object.
+
+`piecutter`'s engines typically are classes that inherit ``piecutter.Engine``
+and override ``render(template, context)`` method.
+
+.. warning::
+
+   Engines support only single templates. Rendering collections of templates
+   involve higher level API (mostly related to loaders) and is implemented at
+   :doc:`cutters </cutters>` level.
+
+
+*************
+Python format
+*************
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.PythonFormatEngine()
+   >>> output = render(u'Hello {who}!', {u'who': u'world'})
+   >>> print(output.read())
+   Hello world!
+
+
+******
+Jinja2
+******
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.Jinja2Engine()
+   >>> output = render(u'Hello {{ who }}!', {u'who': u'world'})
+   >>> print(output.read())
+   Hello world!
+
+
+******
+Django
+******
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.DjangoEngine()
+   >>> output = render(u'Hello {{ who }}!', {u'who': u'world'})
+   >>> print(output.read())
+   Hello world!
+
+
+*****
+Proxy
+*****
+
+This is a special renderer that tries to detect best engine matching template.
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.ProxyEngine(
+   ...     engines={
+   ...         'django': piecutter.DjangoEngine(),
+   ...         'jinja2': piecutter.Jinja2Engine(),
+   ...         'pythonformat': piecutter.PythonFormatEngine(),
+   ...     },
+   ... )
+
+   >>> data = {u'who': u'world'}
+
+   >>> template = piecutter.TextTemplate("{# Jinja2 #}Hello {{ who }}!")
+   >>> print(render(template, data).read())
+   Hello world!
+
+   >>> template = piecutter.TextTemplate("{# Django #}Hello {{ who }}!")
+   >>> print(render(template, data).read())
+   Hello world!
+
+   >>> template = piecutter.TextTemplate("Hello {who}!")
+   >>> print(render(template, data).read())
+   Hello world!

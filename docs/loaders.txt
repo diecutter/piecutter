@@ -1,0 +1,88 @@
+#######
+Loaders
+#######
+
+`piecutter`'s loaders are callables that accept location as input argument then
+return a template object.
+
+.. doctest::
+
+   >>> import piecutter
+   >>> load = piecutter.LocalLoader(root=u'demo')
+   >>> with load(u'hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
+
+Within `piecutter`'s implementation, loaders typically are classes that
+inherit from ``piecutter.Loader`` and override some methods:
+
+* ``open(location)`` returns a template object.
+* ``tree_template(location)`` returns a dynamic tree template, if it exists.
+* ``tree(location)`` statically lists the files in a directory.
+
+
+***********
+LocalLoader
+***********
+
+You can load local files:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> load = piecutter.LocalLoader(root='demo')
+
+   >>> with load('hello.txt') as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
+
+   >>> with load('i-dont-exist.txt') as template:  # Doctest: +ELLIPSIS
+   ...     print(template)
+   Traceback (most recent call last):
+     ...
+   TemplateNotFound: ...
+
+And local directories:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> load = piecutter.LocalLoader(root='demo')
+   >>> print(load.tree('.'))
+   [[u'hello.txt', {}, u'hello.txt'], [u'{who}.txt', {}, u'{who}.txt']]
+
+
+**********
+HttpLoader
+**********
+
+.. doctest::
+
+   >>> load = piecutter.HttpLoader()
+   >>> location = 'https://raw.githubusercontent.com' \
+   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> with load(location) as template:
+   ...     print(template)
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>
+
+
+************
+GithubLoader
+************
+
+.. code-block:: pycon
+
+   >>> from piecutter.utils.files import temporary_directory
+   >>> with temporary_directory() as checkout_dir:
+   ...     load = piecutter.GithubLoader(checkout_dir)
+   ...     try:
+   ...         template = load(
+   ...             'diecutter/diecutter/0.7/demo/templates/greetings.txt')
+   ...         print(template)
+   ...     finally:
+   ...         template.close()
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>

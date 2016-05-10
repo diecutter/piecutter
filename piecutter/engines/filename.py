@@ -13,6 +13,8 @@ class FilenameEngine(Engine):
            silently!
 
         """
+        context.setdefault('piecutter', {})
+        context['piecutter']['engine'] = 'filename'
         for key, val in context.iteritems():
             try:
                 template = template.replace('+{key}+'.format(key=key), val)

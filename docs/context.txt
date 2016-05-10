@@ -1,0 +1,39 @@
+############
+Context data
+############
+
+This document describes how `piecutter` handles data to render templates.
+
+
+********
+Mappings
+********
+
+`piecutter` uses mappings as context data. Any dictionary-like object can be
+used.
+
+
+********************
+Default context data
+********************
+
+`piecutter` registers a special ``piecutter`` variable in context, with values
+about environment and execution.
+
+Here is a sample template using all `piecutter`'s special context:
+
+.. literalinclude:: /../tests/default_context.json
+   :language: jinja
+
+And here is the expected output:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
+   >>> template = open('tests/default_context.json').read()
+   >>> data = {}
+   >>> print(render(template, data).read())
+   {
+     "engine": "jinja2"
+   }

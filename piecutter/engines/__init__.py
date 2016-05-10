@@ -7,7 +7,7 @@ class Engine(object):
 
     Mostly used to document engine API.
 
-    Subclasses must implement :meth:`render`: and :meth:`match`.
+    Subclasses must implement :meth:`do_render`: and :meth:`match`.
 
     >>> from piecutter.engines import Engine
     >>> engine = Engine()
@@ -40,3 +40,7 @@ class Engine(object):
         """
         raise NotImplementedError('Subclasses of "piecutter.engines.Engine" '
                                   'must implement match() method.')
+
+    def __call__(self, template, context):
+        """Return rendered ``template`` against ``context`` data."""
+        return self.render(template, context)

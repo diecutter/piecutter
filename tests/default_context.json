@@ -1,0 +1,6 @@
+{# jinja2 -#}
+{
+  {%- for key, value in piecutter.iteritems() %}
+  "{{ key }}": "{{ value }}"{% if not loop.last %},{% endif %}
+  {%- endfor %}
+}

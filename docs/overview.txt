@@ -1,0 +1,140 @@
+########
+Overview
+########
+
+This document quickly describes `piecutter`'s core concepts and components.
+See also :doc:`/about/vision` about motivations.
+See also :doc:`/quickstart` for a tutorial.
+
+
+*******
+Cutters
+*******
+
+:doc:`Cutters </cutters>` are highest-level components in `piecutter`. They are
+the glue around all the features of `piecutter`. They orchestrate full template
+rendering workflow, from template loading to output post-processing, via
+template rendering of course!
+
+Cutters are callables that take ``template`` (template object or location)
+and ``data`` as input and write output somewhere.
+
+Learn more in :doc:`/cutters`.
+
+
+*******
+Engines
+*******
+
+:doc:`Engines </engines>` are the core components of `piecutter`. They use
+third-party template engines to generate output using templates and context
+data.
+
+Engines are callables that accept `template <templates>`_ (template object
+only) and `data <data>`_ as input then return generated output as an iterable
+file-like object.
+
+`piecutter`'s initial concept is to provide a single API to handle multiple
+template engines. `piecutter`'s core currently supports the following
+third-party engines:
+
+* `Python's builtin string format`_;
+* `Jinja2`_;
+* `Django`_.
+
+Of course, you can implement custom engines.
+
+`piecutter` also provides a special ``ProxyEngine`` that tries to guess the
+best engine to use depending on template.
+
+Learn more in :doc:`/engines`.
+
+
+*******
+Loaders
+*******
+
+:doc:`Loaders </loaders>` load `templates <templates>`_ from Python objects or
+from locations.
+
+Loaders are callables that accept location as input argument then return a
+template object.
+
+`piecutter` provides builtin support for various locations:
+
+* Python builtins (text and file-like objects)
+* files on local filesystem
+* remote files over HTTP
+* remote files on Github.
+
+Of course, you can write your own loaders!
+
+See :doc:`loaders </loaders>` for details.
+
+
+*********
+Templates
+*********
+
+`piecutter` handles :doc:`template objects </templates>`. They are, basically,
+`Python` objects whose content can be read.
+
+Templates can represent either single units (files) or collections
+(directories).
+
+Single units rendered as file-like object.
+
+Collections are rendered as generator of file-like objects.
+
+`Loaders <loaders>`_ make the difference between single units and collections.
+
+Learn more at :doc:`/templates`.
+
+
+****
+Data
+****
+
+`piecutter` uses mappings as context data. Any dictionary-like object can be
+used.
+
+During rendering, additional contextual data is added to the original, such as
+``piecutter.engine``, which represents template engine name.
+
+See :doc:`/context` for details.
+
+
+*******
+Writers
+*******
+
+`piecutter` uses writers to post-process template rendering output.
+
+Learn more at :doc:`/writers`.
+
+
+***********
+Dispatchers
+***********
+
+`piecutter` renders templates using processing pipelines. As an example,
+writers can be chained to perform several operations. Everywhere processing
+could be done by either one or several functions, you can use dispatchers: they
+look like one function but encapsulate several calls.
+
+.. note::
+
+   `piecutter`'s initial scope doesn't include dispatchers. So this feature may
+   be moved to a third-party library.
+
+See :doc:`loaders </dispatchers>` for details.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`Python's builtin string format`:
+   https://docs.python.org/2.7/library/string.html#formatstrings
+.. _`Jinja2`: http://jinja.pocoo.org/
+.. _`Django`: https://docs.djangoproject.com/en/1.8/topics/templates/

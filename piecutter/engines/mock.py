@@ -4,7 +4,8 @@ from piecutter.engines import Engine
 
 
 #: Default value used as :py:attr:`MockEngine.render_result`
-default_render_result = u'RENDER WITH ARGS={args!s} AND KWARGS={kwargs!s}'
+default_render_result = u'RENDER template="{template!s}" ' \
+                        u'AGAINST context={context!s}'
 
 
 class MockEngine(Engine):
@@ -15,36 +16,37 @@ class MockEngine(Engine):
     >>> from piecutter.engines.mock import MockEngine
     >>> mock_result = u'this is expected result'
     >>> mock = MockEngine(mock_result)
-    >>> args = ('arg 1', 'arg 2')
-    >>> kwargs = {'kwarg1': 'kwarg 1', 'kwarg2': 'kwarg 2'}
-    >>> mock.render(*args, **kwargs) == mock_result
+    >>> template = 'arg1'
+    >>> context = {'kwarg1': 'kwarg 1', 'kwarg2': 'kwarg 2'}
+    >>> mock.render(template, context) == mock_result
     True
-    >>> mock.args == args
+    >>> mock.template == template
     True
-    >>> mock.kwargs == kwargs
+    >>> mock.context == context
     True
 
-    You can use ``{args}`` and ``{kwargs}`` in mock result, because render()
-    uses ``self.render_result.format(args=args, kwargs=kwargs)``.
+    You can use ``{template}`` and ``{context}`` in mock result, because
+    render() uses ``self.render_result.format(template=template,
+    context=context)``.
     This feature is used by default:
 
     >>> mock = MockEngine()
-    >>> mock.render_result
-    u'RENDER WITH ARGS={args!s} AND KWARGS={kwargs!s}'
-    >>> mock.render()
-    u'RENDER WITH ARGS=() AND KWARGS={}'
+    >>> print mock.render_result
+    RENDER template="{template!s}" AGAINST context={context!s}
 
     If you setup an exception as :py:attr:`fail` attribute,
     then :py:meth:`render` will raise that exception.
 
     >>> mock = MockEngine(fail=Exception('An error occured'))
-    >>> mock.render()  # Doctest: +ELLIPSIS
+    >>> mock.render('', {})  # Doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
     Exception: An error occured
 
     """
     def __init__(self, render_result=default_render_result, fail=None):
+        super(MockEngine, self).__init__()
+
         #: Value to be returned by :py:meth:`render`.
         self.render_result = render_result
 
@@ -52,20 +54,23 @@ class MockEngine(Engine):
         #: Also, value used as message in the exception.
         self.fail = fail
 
-        #: Stores positional arguments of the last call to :py:meth:`render`.
-        self.args = None
+        #: Stores ``template`` argument of the last call to :meth:`render`.
+        self.template = None
 
-        #: Stores keyword arguments of the last call to :py:meth:`render`.
-        self.kwargs = None
+        #: Stores ``context`` argument of the last call to :py:meth:`render`.
+        self.context = None
 
-    def render(self, *args, **kwargs):
-        """Return self.render_result + populates args and kwargs.
+    def render(self, template, context):
+        """Return self.render_result + populates template and context.
 
         If self.fail is not None, then raises a TemplateError(self.fail).
 
         """
+        context.setdefault('piecutter', {})
+        context['piecutter']['engine'] = 'mock'
         if self.fail is not None:
             raise self.fail
-        self.args = args
-        self.kwargs = kwargs
-        return self.render_result.format(args=args, kwargs=kwargs)
+        self.template = template
+        self.context = context
+        return self.render_result.format(template=self.template,
+                                         context=self.context)

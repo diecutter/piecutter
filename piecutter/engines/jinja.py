@@ -97,32 +97,46 @@ class Jinja2Engine(Engine):
 
     def render(self, template, context):
         """Return the rendered template against context."""
+        context.setdefault('piecutter', {})
+        context['piecutter']['engine'] = 'jinja2'
         try:
-            template = self.environment.from_string(template)
+            template = self.environment.from_string(str(template))
         except TemplateSyntaxError as e:
             raise TemplateError(e)
         try:
-            return template.render(**context)
+            output = template.stream(**context)
+
+            def read_output():
+                return u''.join(output)
+
+            output.read = read_output
+            return output
         except (UndefinedError, TypeError) as e:
             raise TemplateError(e)
 
     def match(self, template, context):
         """Return a ratio showing whether template looks like using engine.
 
+        >>> from piecutter import TextTemplate
         >>> engine = Jinja2Engine()
-        >>> engine.match('', {})
+        >>> engine.match(TextTemplate(''), {})
         0.0
-        >>> engine.match('{# Jinja2 #}', {})
+        >>> engine.match(TextTemplate('{# Jinja2 #}'), {})
         1.0
-        >>> engine.match('Not shebang {# Jinja2 #}', {})
+        >>> engine.match(TextTemplate('{# Jinja2 -#}'), {})
+        1.0
+        >>> engine.match(TextTemplate('Not shebang {# Jinja2 #}'), {})
         0.0
-        >>> engine.match('{{ key }}', {})
+        >>> engine.match(TextTemplate('{{ key }}'), {})
         0.9
 
         """
+        content = template.read()
         # Try to locate a root variable in template.
-        if template.startswith('{# Jinja2 #}'):
+        if content.startswith('{# Jinja2 #}'):
             return 1.0
-        if re.search(r'{{ .+ }}', template):
+        if content.startswith('{# Jinja2 -#}'):
+            return 1.0
+        if re.search(r'{{ .+ }}', content):
             return 0.9
         return 0.0

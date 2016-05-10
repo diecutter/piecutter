@@ -1,33 +1,42 @@
 # -*- coding: utf-8 -*-
 """Template engine using Python's builtin string format."""
 import re
+from cStringIO import StringIO
 
+import piecutter
 from piecutter.engines import Engine
+from piecutter.files import VirtualFile
 
 
 class PythonFormatEngine(Engine):
     """Template engine using Python's builtin string format."""
-    def render(self, template, context):
-        """Return the rendered template against context.
+    code = u'pythonformat'
 
-        >>> engine = PythonFormatEngine()
-        >>> engine.render('Hello {who}!', {'who': 'world'})
-        'Hello world!'
+    def render(self, template, data):
+        data.setdefault('piecutter', {})
+        data['piecutter']['engine'] = self.code
+        template = piecutter.guess_template(template)
+        try:
+            template.seek(0)
+        except (AttributeError, NotImplementedError):
+            pass
+        content = template.read()
+        output = content.format(**data)
+        return VirtualFile(file=StringIO(output))
 
-        """
-        return template.format(**context)
-
-    def match(self, template, context):
+    def match(self, template, data):
         """Return a ratio showing whether template looks like using engine.
 
+        >>> from piecutter import TextTemplate
         >>> engine = PythonFormatEngine()
-        >>> engine.match('', {})
+        >>> engine.match(TextTemplate(''), {})
         0.0
-        >>> engine.match('{key}', {})
+        >>> engine.match(TextTemplate('{key}'), {})
         0.9
 
         """
+        content = template.read()
         # Try to locate a root variable in template.
-        if re.search(r'{.+}', template):
+        if re.search(r'{.+}', content):
             return 0.9
         return 0.0

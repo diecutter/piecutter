@@ -1,0 +1,249 @@
+###################
+Quickstart tutorial
+###################
+
+Let's discover `piecutter` with simple stories!
+
+
+*****************
+Install piecutter
+*****************
+
+.. code:: sh
+
+   pip install piecutter
+
+See :doc:`/install` for details and alternatives.
+
+
+****************
+Import piecutter
+****************
+
+.. doctest::
+
+   >>> import piecutter
+
+This single import should be enough in most cases.
+
+
+************
+Hello world!
+************
+
+Let's produce the traditional ``Hello world!`` with minimal code:
+
+.. doctest::
+
+   >>> render = piecutter.Cutter()
+   >>> template = u'Hello {who}!'
+   >>> data = {u'who': u'world'}
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+
+Notes about this example:
+
+* the template engine is `Python's format()`_ by default
+* data is a mapping
+* output is a file-like object
+* ``piecutter.Cutter`` encapsulates full rendering pipeline.
+
+
+***********************
+Setup a template engine
+***********************
+
+`piecutter` uses :doc:`/engines` to render the templates against data.
+
+`piecutter` has builtin support for the following template engines: `Python's
+format()`_, `Jinja2`_ and `Django`_. Additional engines could be supported,
+including non-Python ones!
+
+Learn more about template engines at :doc:`/engines`.
+
+Jinja2
+======
+
+Let's produce ``Hello world!`` using `Jinja2`_:
+
+.. doctest::
+
+   >>> template = u'Hello {{ who }}!'
+   >>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+
+Django
+======
+
+We can do the same using `Django`_:
+
+.. doctest::
+
+   >>> template = u'Hello {{ who }}!'
+   >>> render = piecutter.Cutter(engine=piecutter.DjangoEngine())
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+
+
+*************************************
+Load templates from various locations
+*************************************
+
+`piecutter` uses :doc:`/loaders` to fetch templates from various locations.
+
+Single templates are rendered as file-like objects, so that you can iterate
+over content.
+
+`piecutter`'s default loader interprets the following locations as single
+templates:
+
+* Python's string types (str, unicode, bytes and text)
+* Python's file objects and equivalents
+* files on local filesystem
+* remote files over HTTP
+* remote files on Github.
+
+Additional loaders could be supported, feel free to write your own!
+
+See :doc:`loaders </loaders>` for details.
+
+File-like objects
+=================
+
+If you pass a file-like object to `piecutter`'s default loader, it will
+automatically use it as a template.
+
+As an example, let's render an in-memory file:
+
+.. doctest::
+
+   >>> from StringIO import StringIO
+   >>> render = piecutter.Cutter()
+   >>> template = StringIO(u'Hello {who}!')
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+
+Of course, we can render an opened file object:
+
+.. doctest::
+
+   >>> render = piecutter.Cutter()
+   >>> with open('demo/hello.txt') as template:
+   ...     output = render(template, data)
+   ...     print(output.read())
+   Hello world!
+   <BLANKLINE>
+
+Templates on local filesystem
+=============================
+
+Use ``file://`` (or ``file:///`` for absolute paths) to tell `piecutter`'s
+default loader to read templates on local filesystem:
+
+.. doctest::
+
+   >>> template = u'file://demo/hello.txt'
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+   <BLANKLINE>
+
+Templates over HTTP
+===================
+
+Use ``http://`` or ``https://`` to tell `piecutter`'s default loader to fetch
+templates from remote HTTP server:
+
+.. doctest::
+
+   >>> template = u'https://raw.github.com/diecutter/piecutter/' \
+   ...            u'cutter-api-reloaded/demo/hello.txt'
+   >>> output = render(template, data)
+   >>> print(output.read())
+   Hello world!
+   <BLANKLINE>
+
+
+******************
+Render directories
+******************
+
+Collections of templates, a.ka. directories, are also supported. By default,
+they are rendered as generator of multiple file-like objects.
+
+`piecutter`'s default loader interprets the following locations as collections
+of templates:
+
+* directories on local filesystem
+* remote directories on Github.
+
+Given the following directory:
+
+.. code:: text
+
+   demo/
+   ├── hello.txt  # Contains "Hello {who}!\n"
+   └── {who}.txt  # Contains "Whatever the content.\n"
+
+When we render the directory, we can iterate each generated item and use their
+``name`` attribute and ``read()`` method:
+
+.. doctest::
+
+   >>> for item in render(u'file://demo/', data):
+   ...     print('Name: {}'.format(item.name))
+   ...     print('Content: {}'.format(item.read()))
+   Name: hello.txt
+   Content: Hello world!
+   <BLANKLINE>
+   Name: world.txt
+   Content: Whatever the content.
+   <BLANKLINE>
+
+
+*****************************
+Write generated files to disk
+*****************************
+
+`piecutter` uses :doc:`writers </writers>` to post-process generated content.
+
+As an example, ``piecutter.FileWriter`` writes generated files to disk:
+
+.. doctest::
+
+   >>> # Let's setup some output directory.
+   >>> import os
+   >>> output_directory = os.path.join(temp_dir, 'directory')
+   >>> os.path.exists(output_directory)
+   False
+
+   >>> # Generate files in output directory.
+   >>> render = piecutter.Cutter()
+   >>> render.writer = piecutter.FileWriter(target=output_directory)
+   >>> written_files = render('file://demo/', data)
+
+   >>> # Inspect the results.
+   >>> sorted(os.listdir(output_directory))
+   ['hello.txt', 'world.txt']
+   >>> print(open(os.path.join(output_directory, 'hello.txt'), 'rb').read())
+   Hello world!
+   <BLANKLINE>
+   >>> written_files  # Contains absolute path to generated files.
+   ['/.../directory/hello.txt', '/.../directory/world.txt']
+
+Learn more at :doc:`/writers`.
+
+
+.. rubric:: Notes & references
+
+.. target-notes::
+
+.. _`Python's format()`:
+   https://docs.python.org/2.7/library/string.html#formatstrings
+.. _`Jinja2`: http://jinja.pocoo.org/
+.. _`Django`: https://docs.djangoproject.com/en/1.8/topics/templates/

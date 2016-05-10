@@ -62,8 +62,8 @@ class ResourceTestCase(unittest.TestCase):
         output_filename = resource.render_filename(input_filename, context)
         # Check.
         self.assertEqual(output_filename, expected_output_filename)
-        self.assertEqual(engine.args, (input_filename, context))
-        self.assertEqual(engine.kwargs, {})
+        self.assertEqual(engine.template, input_filename)
+        self.assertEqual(engine.context, context)
 
 
 class FileResourceTestCase(unittest.TestCase):
@@ -131,8 +131,8 @@ class FileResourceTestCase(unittest.TestCase):
             result = resource.render(context)
             result = ''.join(result)
             self.assertEqual(result, u'this is render result')
-            self.assertEqual(engine.args, (template, context))
-            self.assertEqual(engine.kwargs, {})
+            self.assertEqual(engine.template, template)
+            self.assertEqual(engine.context, context)
 
     def test_render_error(self):
         """FileResource.render() raises ``TemplateError`` in case of fail."""
@@ -245,7 +245,7 @@ class DirResourceTestCase(unittest.TestCase):
 
     def test_render_tree(self):
         """DirResource.render_tree() recurses nested files and directories."""
-        expected_output_filename = 'rendered/{args[0]!s}'
+        expected_output_filename = 'rendered/{template!s}'
         filename_engine = MockEngine(expected_output_filename)
         context = {'fake': 'fake-context'}
         with temporary_directory() as template_dir:
@@ -340,9 +340,12 @@ class DirResourceTestCase(unittest.TestCase):
             resource = resources.DirResource(path=dir_path,
                                              engine=content_engine,
                                              filename_engine=filename_engine)
-            generate_content = lambda: [(filename, ''.join(content))
-                                        for (filename, content)
-                                        in resource.render(context)]
+
+            def generate_content():
+                return [(filename, ''.join(content))
+                        for (filename, content)
+                        in resource.render(context)]
+
             self.assertRaises(ValueError, generate_content)
         self.assertFalse(filename_engine.called)
 
@@ -350,9 +353,9 @@ class DirResourceTestCase(unittest.TestCase):
         """DirResource.render() returns an iterable of rendered templates."""
         with temporary_directory() as template_dir:
             # Setup.
-            expected_filename = 'rendered-filename/{args[0]!s}'
+            expected_filename = 'rendered-filename/{template!s}'
             filename_engine = MockEngine(expected_filename)
-            expected_content = u'rendered-content/{args[0]!s}'
+            expected_content = u'rendered-content/{template!s}'
             content_engine = MockEngine(expected_content)
             context = {'fake': 'fake-context'}
             dir_path = join(template_dir, 'dir')
@@ -377,7 +380,7 @@ class DirResourceTestCase(unittest.TestCase):
     def test_render_template_error(self):
         with temporary_directory() as template_dir:
             # Setup.
-            expected_filename = 'rendered-filename/{args[0]!s}'
+            expected_filename = 'rendered-filename/{template!s}'
             filename_engine = MockEngine(expected_filename)
             content_engine = MockEngine(fail=TemplateError('error!'))
             context = {'fake': 'fake-context'}
@@ -389,8 +392,10 @@ class DirResourceTestCase(unittest.TestCase):
             resource = resources.DirResource(path=dir_path,
                                              engine=content_engine,
                                              filename_engine=filename_engine)
-            # Render.
-            generate_content = lambda: [(filename, ''.join(content))
-                                        for (filename, content)
-                                        in resource.render(context)]
+
+            def generate_content():
+                return [(filename, ''.join(content))
+                        for (filename, content)
+                        in resource.render(context)]
+
             self.assertRaises(TemplateError, generate_content)
