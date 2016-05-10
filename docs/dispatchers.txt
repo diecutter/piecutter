@@ -20,6 +20,9 @@ Dispatchers are configurable callables.
 FirstResultDispatcher
 *********************
 
+Iterate over callables in pipeline, calling each one with original arguments.
+As soon as one returns "non empty" result, break and return this result.
+
 .. doctest::
 
    >>> from piecutter.utils import dispatchers
@@ -37,6 +40,9 @@ FirstResultDispatcher
 LastResultDispatcher
 ********************
 
+Iterate over callables in pipeline, call each one with original arguments.
+Only remember last "non empty" result. At the end, return this result.
+
 .. doctest::
 
    >>> one = lambda x: 'one {thing}'.format(thing=x)
@@ -50,6 +56,10 @@ LastResultDispatcher
 ***************
 ChainDispatcher
 ***************
+
+Iterate over callables in pipeline, call the first one with original arguments,
+then use the current output as input for the next callable... Return the value
+returned by the last callable in the pipeline.
 
 .. doctest::
 

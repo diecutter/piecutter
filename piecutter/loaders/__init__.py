@@ -1,3 +1,4 @@
+"""Loaders are callables that return template object from location."""
 
 
 def parse_location(location):
@@ -19,7 +20,7 @@ def parse_location(location):
 class Loader(object):
     """Loader implements access to locations."""
     def open(self, location):
-        """Return template object from location."""
+        """Return template object (file or directory) from location."""
         raise NotImplementedError()
 
     def is_file(self, location):
@@ -33,13 +34,25 @@ class Loader(object):
     def tree_template(self, location):
         """Return location of dynamic tree template if ``location`` is a dir.
 
-        Raises ``AttributeError`` if ``location`` has no tree template.
+        Whenever possible, dynamic tree template file should be named
+        ".directory-tree".
+
+        Raise exception if ``location`` is not a directory.
+
+        Raise ``TemplateNotFound`` if ``location`` has no tree template.
 
         """
         raise NotImplementedError()
 
     def tree(self, location):
-        """Return static list of templates given ``location`` is a dir."""
+        """Return static list of templates, given ``location`` is a directory.
+
+        As an example a "local filesystem" implementation should just return
+        the list of items in directory, except special dynamic tree template.
+
+        Raise exception if ``location`` is not a directory.
+
+        """
         raise NotImplementedError()
 
     def __call__(self, location):

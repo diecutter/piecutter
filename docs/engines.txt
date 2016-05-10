@@ -2,25 +2,16 @@
 Engines
 #######
 
-This document explains `piecutter`'s engines.
-
-.. testsetup::
-
-   from __future__ import print_function
-
 `piecutter`'s engines use third-party template engines to generate output using
 template and data.
 
 Engines are callables that accept ``template, data`` as input then return
 generated output as an iterable file-like object.
 
-`piecutter`'s engines typically are classes that inherit ``piecutter.Engine``
-and override ``render(template, context)`` method.
-
 .. warning::
 
    Engines support only single templates. Rendering collections of templates
-   involve higher level API (mostly related to loaders) and is implemented at
+   involve interactions with loaders. This feature is implemented by
    :doc:`cutters </cutters>` level.
 
 
@@ -93,3 +84,23 @@ This is a special renderer that tries to detect best engine matching template.
    >>> template = piecutter.TextTemplate("Hello {who}!")
    >>> print(render(template, data).read())
    Hello world!
+
+.. warning::
+
+   ``piecutter.ProxyEngine`` is experimental and not yet optimized: it loads
+   template content in memory in order to guess engine. Better implementations
+   or alternatives (such as using template filename's extension) are welcome!
+
+
+**************
+Custom engines
+**************
+
+Engines typically are classes that inherit from ``piecutter.Engine``. Feel free
+to write your own!
+
+.. autoclass:: piecutter.engines.Engine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :member-order: bysource

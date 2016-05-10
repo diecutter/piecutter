@@ -5,7 +5,11 @@ import sys
 
 
 class Writer(object):
-    """Base class for writers."""
+    """Writers post-process generated content.
+
+    Subclasses MUST implement :meth:`write`.
+
+    """
     def write(self, content):
         """Post-process template-rendering result."""
         raise NotImplementedError('Subclasses must implement "write()" method')

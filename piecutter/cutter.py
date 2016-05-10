@@ -64,7 +64,10 @@ class Cutter(object):
             tree = json.load(encoded_tree)
         except (AttributeError, piecutter.TemplateNotFound):
             # There is no dynamic tree template.
-            tree = self.loader.tree(template.location)
+            tree = []
+            for location in self.loader.tree(template.location):
+                name = location[len(template.location):]
+                tree.append([location, {}, name])
         for location, overrides, name in tree:
             rendered_name = self.render_file(name, data).read()
             local_data = data

@@ -18,6 +18,20 @@ class LocalLoader(Loader):
             return pathlib.Path(path)
         return path
 
+    def is_file(self, location):
+        parts = parse_location(location)
+        path = parts['path']
+        path = self._to_path(path)
+        full_path = self.root / path
+        return full_path.is_file()
+
+    def is_dir(self, location):
+        parts = parse_location(location)
+        path = parts['path']
+        path = self._to_path(path)
+        full_path = self.root / path
+        return full_path.is_dir()
+
     def tree_template(self, location):
         parts = parse_location(location)
         path = parts['path']
@@ -45,11 +59,7 @@ class LocalLoader(Loader):
                                              unicode(item_path)])
             else:
                 item_location = item_path
-            items.append([
-                unicode(item_location),
-                {},
-                unicode(relative_path),
-            ])
+            items.append(unicode(item_location))
         return items
 
     @contextlib.contextmanager

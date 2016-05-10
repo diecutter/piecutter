@@ -21,7 +21,8 @@ templates).
 Additional engines such as `Cheetah`_ or non-Python template engines such as
 Ruby's `ERB`_ could be supported.
 
-**Extensible template loading**: local filesystem, HTTP, github.com...
+**Extensible template loading**: text, bytes, file-like objects, files on
+local filesystem, remote resources over HTTP, remote resources on github.com...
 Additional storages could be supported.
 
 **Configurable post-processing**: write to local filesystem, generate an
@@ -39,50 +40,45 @@ Examples
 Hello world!
 ============
 
+Let's generate the traditional "Hello world!":
+
 >>> import piecutter
->>> template = u'Hello {who}!'
->>> data = {u'who': u'world'}
->>> render = piecutter.Cutter()
->>> output = render(template, data)
+>>> template = u'Hello {who}!'  # Simplest template is text. Could be a file.
+>>> data = {u'who': u'world'}  # Data can be any dictionary-like object.
+>>> render = piecutter.Cutter()  # Default engine uses Python's format().
+>>> output = render(template, data)  # Default output is a file-like object.
 >>> print(output.read())
 Hello world!
-
-`piecutter` has builtin support for the following template engines:
-
-* `Python's format()`_
-* `Jinja2`_
-* `Django`_.
-
-Feel free to implement support for additional ones. Non-Python engines could be
-supported too!
-
-Load remote file
-================
-
->>> template = u'https://raw.github.com/diecutter/piecutter/' \
-...            u'cutter-api-reloaded/demo/hello.txt'
->>> output = render(template, data)
->>> print(output.read())
-Hello world!
-<BLANKLINE>
-
-`piecutter` can load templates from various locations :
-
-* Python builtins, such as text, bytes, file-like objects, ...
-* resources on local filesystem
-* remote resources over HTTP
-* remote resources on github.com.
-
-Feel free to implement support of additional loaders!
-
-Render directories
-==================
 
 With ``piecutter.Cutter``'s default setup, files are rendered as file-like
 objects, so that you can iterate over content.
 
-Collections of templates, a.ka. directories, are also supported. By default,
-they are rendered as generator of file-like objects.
+Load files
+==========
+
+Let's load and render a template located on local filesystem:
+
+>>> location = u'file://demo/hello.txt'
+>>> output = render(location, data)
+>>> print(output.read())
+Hello world!
+<BLANKLINE>
+
+It works the same with a remote template over HTTP:
+
+>>> location = u'https://raw.github.com/diecutter/piecutter/' \
+...            u'cutter-api-reloaded/demo/hello.txt'
+>>> output = render(location, data)
+>>> print(output.read())
+Hello world!
+<BLANKLINE>
+
+``piecutter.Cutter``'s default loader is a proxy that automatically detects
+scheme (``file://`` and ``https://`` in examples above) then dispatches actual
+loading to a specialized loader implementation.
+
+Render directories
+==================
 
 Given the following directory:
 
@@ -92,8 +88,9 @@ Given the following directory:
    ├── hello.txt  # Contains "Hello {who}!\n"
    └── {who}.txt  # Contains "Whatever the content.\n"
 
-When we render the directory, we can iterate each generated item and use their
-``name`` attribute and ``read()`` method:
+By default, directories are rendered as generator of file-like objects. So we
+can iterate generated items and use their ``name`` attribute and ``read()``
+method:
 
 >>> for item in render(u'file://demo/', data):
 ...     print('Name: {}'.format(item.name))
@@ -131,19 +128,11 @@ independantly from `diecutter`.
 Resources
 *********
 
-<<<<<<< HEAD
 * Documentation: https://piecutter.readthedocs.io
 * PyPI page: http://pypi.python.org/pypi/piecutter
 * Bugtracker: https://github.com/diecutter/piecutter/issues
 * Changelog: https://piecutter.readthedocs.io/en/latest/about/changelog.html
-* Roadmap: https://github.com/diecutter/piecutter/issues/milestones
-=======
-* Documentation: https://piecutter.readthedocs.org
-* PyPI page: https://pypi.python.org/pypi/piecutter
-* Bugtracker: https://github.com/diecutter/piecutter/issues
-* Changelog: https://piecutter.readthedocs.org/en/latest/about/changelog.html
 * Roadmap: https://github.com/diecutter/piecutter/milestones
->>>>>>> cutter-api-reloaded
 * Code repository: https://github.com/diecutter/piecutter
 * Continuous integration: https://travis-ci.org/diecutter/piecutter
 

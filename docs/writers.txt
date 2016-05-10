@@ -2,4 +2,97 @@
 Writers
 #######
 
-This document explains `piecutter`'s writers.
+Writers post-process generated content.
+
+The default writer in ``piecutter.Cutter`` is ``piecutter.TransparentWriter``.
+
+
+*****************
+TransparentWriter
+*****************
+
+``piecutter.TransparentWriter`` just returns result as is:
+
+.. doctest::
+
+   >>> import piecutter
+   >>> write = piecutter.TransparentWriter()
+   >>> write('Hello') is 'Hello'
+   True
+
+With this writer in a ``Cutter``, you get the output of the engine.
+
+
+************
+StreamWriter
+************
+
+``piecutter.StreamWriter`` writes generated content to a stream:
+
+.. doctest::
+
+   >>> import sys
+   >>> render = piecutter.Cutter()
+   >>> render.writer = piecutter.StreamWriter(stream=sys.stdout)
+   >>> render('file://demo/hello.txt', {u'who': u'world'})
+   Hello world!
+
+
+***********
+PrintWriter
+***********
+
+``piecutter.PrintWriter`` sends generated content to builtin ``print``
+function:
+
+.. doctest::
+
+   >>> import sys
+   >>> render = piecutter.Cutter()
+   >>> render.writer = piecutter.PrintWriter()
+   >>> render('file://demo/hello.txt', {u'who': u'world'})
+   Hello world!
+   <BLANKLINE>
+
+
+**********
+FileWriter
+**********
+
+``piecutter.FileWriter`` writes generated files to disk and return list of
+written filenames:
+
+.. doctest::
+
+   >>> # Let's setup some output directory.
+   >>> output_directory = os.path.join(temp_dir, 'directory')
+   >>> os.path.exists(output_directory)
+   False
+
+   >>> # Generate files in output directory.
+   >>> render = piecutter.Cutter()
+   >>> render.writer = piecutter.FileWriter(target=output_directory)
+   >>> written_files = render('file://demo/', {u'who': u'world'})
+
+   >>> # Inspect the results.
+   >>> sorted(os.listdir(output_directory))
+   ['hello.txt', 'world.txt']
+   >>> print(open(os.path.join(output_directory, 'hello.txt'), 'rb').read())
+   Hello world!
+   <BLANKLINE>
+   >>> written_files  # Contains absolute path to generated files.
+   ['/.../directory/hello.txt', '/.../directory/world.txt']
+
+
+**************
+Custom writers
+**************
+
+Writers typically are classes that inherit from ``piecutter.Writer``. Feel free
+to implement your own!
+
+.. autoclass:: piecutter.writers.Writer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :member-order: bysource

@@ -26,7 +26,8 @@ output somewhere.
 Cutters are configurable
 ************************
 
-Cutters are objects that can be configured with loaders, engines and writers.
+Cutters are objects that can be configured with :doc:`loaders </loaders>`,
+:doc:`engines </engines>` and :doc:`writers </writers>`.
 
 .. doctest::
 
@@ -40,3 +41,9 @@ Cutters are objects that can be configured with loaders, engines and writers.
    ...     '/diecutter/diecutter/0.7/demo/templates/greetings.txt',
    ...     {'name': 'world'})
    Hello world!
+
+.. tip::
+
+   If you want loader, engine or writer to perform multiple tasks, then you
+   may be interested in :doc:`dispatchers </dispatchers>`. Dispatchers help you
+   create pipelines of callables.

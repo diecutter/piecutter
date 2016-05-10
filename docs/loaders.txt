@@ -2,8 +2,8 @@
 Loaders
 #######
 
-`piecutter`'s loaders are callables that accept location as input argument then
-return a template object.
+Loaders are callables that accept location as input argument then return a
+:doc:`template object </templates>`:
 
 .. doctest::
 
@@ -14,19 +14,22 @@ return a template object.
    Hello {who}!
    <BLANKLINE>
 
-Within `piecutter`'s implementation, loaders typically are classes that
-inherit from ``piecutter.Loader`` and override some methods:
+Loaders encapsulate communication with file storages, either local or remote.
+They can:
 
-* ``open(location)`` returns a template object.
-* ``tree_template(location)`` returns a dynamic tree template, if it exists.
-* ``tree(location)`` statically lists the files in a directory.
+* distinguish single files from directories
+* read contents of single files
+* get a dynamic tree template out of a directory
+* or get the static list of templates in a directory.
+
+The default loader of ``piecutter.Cutter`` is a ``piecutter.ProxyLoader``.
 
 
 ***********
 LocalLoader
 ***********
 
-You can load local files:
+``piecutter.LocalLoader`` handles files in local filesystem.
 
 .. doctest::
 
@@ -51,12 +54,14 @@ And local directories:
    >>> import piecutter
    >>> load = piecutter.LocalLoader(root='demo')
    >>> print(load.tree('.'))
-   [[u'hello.txt', {}, u'hello.txt'], [u'{who}.txt', {}, u'{who}.txt']]
+   [u'hello.txt', u'{who}.txt']
 
 
 **********
 HttpLoader
 **********
+
+``piecutter.HttpLoader`` handles files over HTTP.
 
 .. doctest::
 
@@ -73,16 +78,85 @@ HttpLoader
 GithubLoader
 ************
 
+``piecutter.GithubLoader`` handles files in Github repository.
+
 .. code-block:: pycon
 
-   >>> from piecutter.utils.files import temporary_directory
-   >>> with temporary_directory() as checkout_dir:
-   ...     load = piecutter.GithubLoader(checkout_dir)
-   ...     try:
-   ...         template = load(
-   ...             'diecutter/diecutter/0.7/demo/templates/greetings.txt')
-   ...         print(template)
-   ...     finally:
-   ...         template.close()
+   >>> checkout_dir = os.path.join(temp_dir, 'github-checkout')
+   >>> load = piecutter.GithubLoader(checkout_dir)
+   >>> location = 'diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> with load(location) as template:
+   ...     print(template)
    {{ greetings|default('Hello') }} {{ name }}!
    <BLANKLINE>
+
+
+***********
+ProxyLoader
+***********
+
+``piecutter.ProxyLoader`` delegates loading to specific implementation
+depending on location:
+
+* if location is a :doc:`Template object </templates>`, just return it.
+
+* if location is Python's text, try to detect scheme (fallback to "text://")
+  then route to specific loader matching this scheme.
+
+* if location is file-like object, route to specific loader matching
+  "fileobj://" scheme.
+
+Let's initialize a proxy with routes:
+
+.. doctest::
+
+   >>> load = piecutter.ProxyLoader(
+   ...     routes={  # The following are defaults.
+   ...         'text': piecutter.TextLoader(),
+   ...         'fileobj': piecutter.FileObjLoader(),
+   ...         'file': piecutter.LocalLoader(),
+   ...         'http': piecutter.HttpLoader(),
+   ...         'https': piecutter.HttpLoader(),
+   ...     })
+
+Then load templates from various locations:
+
+   >>> location = u'Just raw text\n'
+   >>> with load(location) as template:
+   ...     print(template)
+   Just raw text
+   <BLANKLINE>
+
+   >>> from StringIO import StringIO
+   >>> location = StringIO('Content in some file-like object\n')
+   >>> with load(location) as template:
+   ...     print(template)
+   Content in some file-like object
+   <BLANKLINE>
+
+   >>> location = 'file://demo/hello.txt'
+   >>> with load(location) as template:
+   ...     print(template)
+   Hello {who}!
+   <BLANKLINE>
+
+   >>> location = 'https://raw.githubusercontent.com' \
+   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> with load(location) as template:
+   ...     print(template)
+   {{ greetings|default('Hello') }} {{ name }}!
+   <BLANKLINE>
+
+
+**************
+Custom loaders
+**************
+
+Loaders typically are classes that inherit from ``piecutter.Loader``. Feel free
+to write your own!
+
+.. autoclass:: piecutter.loaders.Loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :member-order: bysource

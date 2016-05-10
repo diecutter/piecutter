@@ -31,9 +31,7 @@ And here is the expected output:
 
    >>> import piecutter
    >>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
-   >>> template = open('tests/default_context.json').read()
-   >>> data = {}
-   >>> print(render(template, data).read())
+   >>> print(render('file://tests/default_context.json', {}).read())
    {
      "engine": "jinja2"
    }
