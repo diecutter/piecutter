@@ -58,7 +58,7 @@ Load files
 
 Let's load and render a template located on local filesystem:
 
->>> location = u'file://demo/hello.txt'
+>>> location = u'file://demo/simple/hello.txt'
 >>> output = render(location, data)
 >>> print(output.read())
 Hello world!
@@ -84,7 +84,7 @@ Given the following directory:
 
 .. code:: text
 
-   demo/
+   demo/simple/
    ├── hello.txt  # Contains "Hello {who}!\n"
    └── {who}.txt  # Contains "Whatever the content.\n"
 
@@ -92,7 +92,7 @@ By default, directories are rendered as generator of file-like objects. So we
 can iterate generated items and use their ``name`` attribute and ``read()``
 method:
 
->>> for item in render(u'file://demo/', data):
+>>> for item in render(u'file://demo/simple/', data):
 ...     print('Name: {}'.format(item.name))
 ...     print('Content: {}'.format(item.read()))
 Name: hello.txt

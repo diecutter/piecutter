@@ -5,8 +5,29 @@
 """
 import contextlib
 import json
+from urlparse import urlparse, urlunparse
 
 import piecutter
+
+
+def relative_to(directory, location):
+    """Return location, relative to directory if not absolute."""
+    location_parts = urlparse(location)
+    if location_parts.scheme:
+        return location
+    else:
+        directory_parts = urlparse(directory)
+        if location_parts.path.startswith('/'):
+            path = location_parts.path
+        else:
+            path = u'/'.join([directory_parts.path.rstrip('/'),
+                              location_parts.path])
+        return urlunparse([directory_parts.scheme,
+                           directory_parts.netloc,
+                           path,
+                           '',
+                           '',
+                           ''])
 
 
 class Cutter(object):
@@ -57,25 +78,56 @@ class Cutter(object):
 
     def render_directory(self, template, data):
         try:
-            # There is a dynamic tree template.
-            tree_location = self.loader.tree_template(template.location)
-            with self.open(tree_location) as tree_template:
-                encoded_tree = self.render_file(tree_template, data)
-            tree = json.load(encoded_tree)
+            tree = self.dynamic_tree(template, data)
         except (AttributeError, piecutter.TemplateNotFound):
-            # There is no dynamic tree template.
-            tree = []
-            for location in self.loader.tree(template.location):
-                name = location[len(template.location):]
-                tree.append([location, {}, name])
-        for location, overrides, name in tree:
-            rendered_name = self.render_file(name, data).read()
-            local_data = data
-            local_data.update(overrides)
-            with self.open(location) as template:
-                result = self.render(template, local_data)
+            tree = self.static_tree(template, data)
+        for location, filename, data_overrides in tree:
+            local_data = data.copy()
+            local_data.update(data_overrides)
+            rendered_name = self.render_file(filename, local_data).read()
+            location = relative_to(template.location, location)
+            with self.open(location) as sub_template:
+                result = self.render(sub_template, local_data)
+            setattr(result, 'location', location)
             setattr(result, 'name', rendered_name)
             yield result
+
+    def static_tree(self, template, data):
+        """Return static list of files in template directory.
+
+        The result is a list of ``(location, filename, data)``.
+
+        """
+        tree = []
+        for location in self.loader.tree(template.location):
+            name = location[len(template.location):]
+            tree.append([location, name, {}])
+        return tree
+
+    def dynamic_tree(self, template, data):
+        """Return dynamic template-based list of files in directory.
+
+        The result is a list of ``(location, filename, data)``.
+
+        """
+        # Get the tree template's location.
+        tree_location = self.loader.tree_template(template.location)
+        # Render tree template, without involving writers.
+        with self.open(tree_location) as tree_template:
+            encoded_tree = self.render_file(tree_template, data).read().strip()
+        # Extract raw data from tree template.
+        if encoded_tree:
+            tree_items = json.loads(encoded_tree)
+        else:  # Edge case: empty template.
+            tree_items = []
+        tree = []
+        for item in tree_items:
+            tree.append((
+                item['template'],
+                item.get('filename', item['template']),
+                item.get('data', {})
+            ))
+        return tree
 
     def write(self, content):
         """Process ``content``."""

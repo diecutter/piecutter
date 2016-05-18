@@ -10,6 +10,7 @@ Contents
    :titlesonly:
 
    quickstart
+   dynamic-trees
    install
    overview
    cutters

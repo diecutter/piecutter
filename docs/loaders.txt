@@ -8,7 +8,7 @@ Loaders are callables that accept location as input argument then return a
 .. doctest::
 
    >>> import piecutter
-   >>> load = piecutter.LocalLoader(root=u'demo')
+   >>> load = piecutter.LocalLoader(root=u'demo/simple')
    >>> with load(u'hello.txt') as template:
    ...     print(template)
    Hello {who}!
@@ -34,7 +34,7 @@ LocalLoader
 .. doctest::
 
    >>> import piecutter
-   >>> load = piecutter.LocalLoader(root='demo')
+   >>> load = piecutter.LocalLoader(root='demo/simple')
 
    >>> with load('hello.txt') as template:
    ...     print(template)
@@ -52,7 +52,7 @@ And local directories:
 .. doctest::
 
    >>> import piecutter
-   >>> load = piecutter.LocalLoader(root='demo')
+   >>> load = piecutter.LocalLoader(root='demo/simple')
    >>> print(load.tree('.'))
    [u'hello.txt', u'{who}.txt']
 
@@ -134,7 +134,7 @@ Then load templates from various locations:
    Content in some file-like object
    <BLANKLINE>
 
-   >>> location = 'file://demo/hello.txt'
+   >>> location = 'file://demo/simple/hello.txt'
    >>> with load(location) as template:
    ...     print(template)
    Hello {who}!

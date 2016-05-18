@@ -28,7 +28,7 @@ collections:
 .. doctest::
 
    >>> import piecutter
-   >>> loader = piecutter.LocalLoader(root=u'demo')
+   >>> loader = piecutter.LocalLoader(root=u'demo/simple')
 
    >>> loader.is_file(u'hello.txt')
    True
@@ -71,7 +71,7 @@ You can create templates from file-like objects:
 
 .. doctest::
 
-   >>> with open('demo/hello.txt') as template_file:
+   >>> with open('demo/simple/hello.txt') as template_file:
    ...     template = piecutter.FileTemplate(template_file)
    ...     template  # Doctest: +ELLIPSIS
    ...     print(template)
@@ -90,7 +90,7 @@ locations:
 .. doctest::
 
    >>> import pathlib
-   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo'))
+   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo/simple'))
    >>> with loader.open('hello.txt') as template:
    ...     print(template)
    Hello {who}!
@@ -108,6 +108,6 @@ You can create templates from directories using :doc:`loaders </loaders>`:
 
 .. doctest::
 
-   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo'))
+   >>> loader = piecutter.LocalLoader(root=pathlib.Path('demo/simple'))
    >>> print(loader.tree('.'))
    [u'hello.txt', u'{who}.txt']

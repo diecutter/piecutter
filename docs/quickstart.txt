@@ -133,7 +133,7 @@ Of course, we can render an opened file object:
 .. doctest::
 
    >>> render = piecutter.Cutter()
-   >>> with open('demo/hello.txt') as template:
+   >>> with open('demo/simple/hello.txt') as template:
    ...     output = render(template, data)
    ...     print(output.read())
    Hello world!
@@ -147,7 +147,7 @@ default loader to read templates on local filesystem:
 
 .. doctest::
 
-   >>> template = u'file://demo/hello.txt'
+   >>> template = u'file://demo/simple/hello.txt'
    >>> output = render(template, data)
    >>> print(output.read())
    Hello world!
@@ -186,7 +186,7 @@ Given the following directory:
 
 .. code:: text
 
-   demo/
+   demo/simple/
    ├── hello.txt  # Contains "Hello {who}!\n"
    └── {who}.txt  # Contains "Whatever the content.\n"
 
@@ -195,7 +195,7 @@ When we render the directory, we can iterate each generated item and use their
 
 .. doctest::
 
-   >>> for item in render(u'file://demo/', data):
+   >>> for item in render(u'file://demo/simple/', data):
    ...     print('Name: {}'.format(item.name))
    ...     print('Content: {}'.format(item.read()))
    Name: hello.txt
@@ -225,7 +225,7 @@ As an example, ``piecutter.FileWriter`` writes generated files to disk:
    >>> # Generate files in output directory.
    >>> render = piecutter.Cutter()
    >>> render.writer = piecutter.FileWriter(target=output_directory)
-   >>> written_files = render('file://demo/', data)
+   >>> written_files = render('file://demo/simple/', data)
 
    >>> # Inspect the results.
    >>> sorted(os.listdir(output_directory))

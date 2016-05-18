@@ -34,7 +34,7 @@ StreamWriter
    >>> import sys
    >>> render = piecutter.Cutter()
    >>> render.writer = piecutter.StreamWriter(stream=sys.stdout)
-   >>> render('file://demo/hello.txt', {u'who': u'world'})
+   >>> render('file://demo/simple/hello.txt', {u'who': u'world'})
    Hello world!
 
 
@@ -50,7 +50,7 @@ function:
    >>> import sys
    >>> render = piecutter.Cutter()
    >>> render.writer = piecutter.PrintWriter()
-   >>> render('file://demo/hello.txt', {u'who': u'world'})
+   >>> render('file://demo/simple/hello.txt', {u'who': u'world'})
    Hello world!
    <BLANKLINE>
 
@@ -72,7 +72,7 @@ written filenames:
    >>> # Generate files in output directory.
    >>> render = piecutter.Cutter()
    >>> render.writer = piecutter.FileWriter(target=output_directory)
-   >>> written_files = render('file://demo/', {u'who': u'world'})
+   >>> written_files = render('file://demo/simple/', {u'who': u'world'})
 
    >>> # Inspect the results.
    >>> sorted(os.listdir(output_directory))
