@@ -3,6 +3,10 @@
 
 class Template(object):
     """Base class for template objects."""
+    location = u''
+    name = u''
+    path = u''
+
     def read(self):
         raise NotImplementedError()
 

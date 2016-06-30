@@ -3,6 +3,8 @@ from __future__ import print_function
 import os
 import sys
 
+from piecutter.cutter import RenderedDirectory
+
 
 class Writer(object):
     """Writers post-process generated content.
@@ -46,17 +48,25 @@ class FileWriter(Writer):
         if self.target is None:
             self.target = os.getcwd()
 
-    def write(self, content):
+    def write(self, content, prefix=None):
         written = []
-        if hasattr(content, 'name'):
-            filename = os.path.join(self.target, content.name)
+        if prefix:
+            name = os.path.join(self.target, prefix, content.name)
+        else:
+            name = os.path.join(self.target, content.name)
+        if isinstance(content, RenderedDirectory):
+            dirname = name
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            for item in content:
+                recursively_written = self.write(item, prefix=content.name)
+                written.extend(recursively_written)
+        else:
+            filename = name
             dirname = os.path.dirname(filename)
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
             with open(filename, 'wb') as outfile:
                 outfile.write(content.read())
                 written.append(filename)
-        else:
-            for item in content:
-                written.extend(self.write(item))
         return written

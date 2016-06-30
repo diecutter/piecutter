@@ -37,8 +37,7 @@ Cutters are objects that can be configured with :doc:`loaders </loaders>`,
    ...     writer=piecutter.PrintWriter(),
    ... )
    >>> render(
-   ...     'https://raw.githubusercontent.com'
-   ...     '/diecutter/diecutter/0.7/demo/templates/greetings.txt',
+   ...     'https://raw.githubusercontent.com/diecutter/diecutter/0.7/demo/templates/greetings.txt',
    ...     {'name': 'world'})
    Hello world!
 

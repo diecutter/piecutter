@@ -66,8 +66,7 @@ HttpLoader
 .. doctest::
 
    >>> load = piecutter.HttpLoader()
-   >>> location = 'https://raw.githubusercontent.com' \
-   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> location = 'https://raw.githubusercontent.com/diecutter/diecutter/0.7/demo/templates/greetings.txt'
    >>> with load(location) as template:
    ...     print(template)
    {{ greetings|default('Hello') }} {{ name }}!
@@ -140,8 +139,7 @@ Then load templates from various locations:
    Hello {who}!
    <BLANKLINE>
 
-   >>> location = 'https://raw.githubusercontent.com' \
-   ...            '/diecutter/diecutter/0.7/demo/templates/greetings.txt'
+   >>> location = 'https://raw.githubusercontent.com/diecutter/diecutter/0.7/demo/templates/greetings.txt'
    >>> with load(location) as template:
    ...     print(template)
    {{ greetings|default('Hello') }} {{ name }}!

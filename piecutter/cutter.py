@@ -5,6 +5,7 @@
 """
 import contextlib
 import json
+from pathlib import PurePosixPath
 from urlparse import urlparse, urlunparse
 
 import piecutter
@@ -28,6 +29,46 @@ def relative_to(directory, location):
                            '',
                            '',
                            ''])
+
+
+class RenderedObject(object):
+    def __init__(self):
+        #: Name (basename) of the object.
+        #:
+        #: Example: u"hello.txt".
+        self.name = u''
+
+        #: Path of the object, relative to template's root.
+        #:
+        #: Example: u"simple/hello.txt".
+        self.path = u''
+
+        #: Location the object was loaded from, typically an URL.
+        #:
+        #: May contain template engine's syntax.
+        #: Example: u"file://demo/simple/{what}.txt".
+        self.location = u''
+
+
+class RenderedFile(RenderedObject):
+    def __init__(self, content):
+        super(RenderedFile, self).__init__()
+        self.content = content
+
+    def __iter__(self):
+        return self.content.__iter__()
+
+    def read(self):
+        return ''.join(self)
+
+
+class RenderedDirectory(RenderedObject):
+    def __init__(self, tree=None):
+        super(RenderedDirectory, self).__init__()
+        self.tree = tree
+
+    def __iter__(self):
+        return self.tree.__iter__()
 
 
 class Cutter(object):
@@ -66,17 +107,48 @@ class Cutter(object):
             template.location = location
             yield template
 
-    def render(self, template, data):
+    def render(self, template, data, path_prefix=None):
         """Return result of template rendered against data."""
         if template.is_file:
-            return self.render_file(template, data)
+            return self.render_file(template, data, path_prefix=path_prefix)
         else:
-            return self.render_directory(template, data)
+            return self.render_directory(template,
+                                         data,
+                                         path_prefix=path_prefix)
 
-    def render_file(self, template, data):
-        return self.engine.render(template, data)
+    def render_file(self, template, data, path_prefix=None):
+        name = template.name
+        if name:
+            name = self.engine.render(
+                piecutter.TextTemplate(template.name),
+                data).read()
+        path = name
+        if path_prefix:
+            path = PurePosixPath(path_prefix) / PurePosixPath(path)
+        result = RenderedFile(content=self.engine.render(template, data))
+        setattr(result, 'location', template.location)
+        setattr(result, 'name', name)
+        setattr(result, 'path', path)
+        return result
 
-    def render_directory(self, template, data):
+    def render_directory(self, template, data, path_prefix=None):
+        name = template.name
+        if name:
+            name = self.engine.render(
+                piecutter.TextTemplate(name),
+                data).read()
+        path = name
+        if path_prefix:
+            path = unicode(PurePosixPath(path_prefix) / PurePosixPath(path))
+        tree = self.render_directory_items(template, data, path_prefix=path)
+        result = RenderedDirectory(tree=tree)
+        setattr(result, 'location', template.location)
+        setattr(result, 'name', name)
+        setattr(result, 'path', path)
+        return result
+
+    def render_directory_items(self, template, data, path_prefix=None):
+        """Generate file and Directory object for each item in directory."""
         try:
             tree = self.dynamic_tree(template, data)
         except (AttributeError, piecutter.TemplateNotFound):
@@ -84,12 +156,20 @@ class Cutter(object):
         for location, filename, data_overrides in tree:
             local_data = data.copy()
             local_data.update(data_overrides)
-            rendered_name = self.render_file(filename, local_data).read()
             location = relative_to(template.location, location)
             with self.open(location) as sub_template:
-                result = self.render(sub_template, local_data)
-            setattr(result, 'location', location)
+                result = self.render(sub_template,
+                                     local_data,
+                                     path_prefix=path_prefix)
+            rendered_name = self.engine.render(
+                piecutter.TextTemplate(filename),
+                local_data).read()  # May differ from template's original name.
+            path = rendered_name
+            if path_prefix:
+                path = unicode(
+                    PurePosixPath(path_prefix) / PurePosixPath(path))
             setattr(result, 'name', rendered_name)
+            setattr(result, 'path', path)
             yield result
 
     def static_tree(self, template, data):
@@ -100,7 +180,7 @@ class Cutter(object):
         """
         tree = []
         for location in self.loader.tree(template.location):
-            name = location[len(template.location):]
+            name = location[len(template.location):].lstrip('/')  # HACK!
             tree.append([location, name, {}])
         return tree
 

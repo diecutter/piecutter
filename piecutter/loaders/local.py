@@ -69,7 +69,7 @@ class LocalLoader(Loader):
         path = self._to_path(path)
         full_path = self.root / path
         try:
-            full_path.relative_to(self.root)
+            relative_path = full_path.relative_to(self.root)
         except ValueError as exception:
             raise piecutter.TemplateNotFound(
                 'Cannot load outside root. Exception was {exception}'
@@ -80,6 +80,8 @@ class LocalLoader(Loader):
         if full_path.is_dir():
             # Return dir template.
             template = piecutter.DirectoryTemplate()
+            template.name = relative_path.name
+            template.path = unicode(relative_path)
             template.close = lambda: None
             yield template
         else:
@@ -87,6 +89,8 @@ class LocalLoader(Loader):
             try:
                 file_object = full_path.open('rb')
                 template = piecutter.FileTemplate(file_object)
+                template.name = relative_path.name
+                template.path = unicode(relative_path)
                 setattr(template, 'close', file_object.close)
                 yield template
             except (IOError, OSError) as exception:

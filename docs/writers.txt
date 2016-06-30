@@ -72,16 +72,18 @@ written filenames:
    >>> # Generate files in output directory.
    >>> render = piecutter.Cutter()
    >>> render.writer = piecutter.FileWriter(target=output_directory)
-   >>> written_files = render('file://demo/simple/', {u'who': u'world'})
+   >>> written_files = render('file://demo/simple', {u'who': u'world'})
 
    >>> # Inspect the results.
    >>> sorted(os.listdir(output_directory))
+   ['simple']
+   >>> sorted(os.listdir(os.path.join(output_directory, 'simple')))
    ['hello.txt', 'world.txt']
-   >>> print(open(os.path.join(output_directory, 'hello.txt'), 'rb').read())
+   >>> print(open(os.path.join(output_directory, 'simple', 'hello.txt'), 'rb').read())
    Hello world!
    <BLANKLINE>
    >>> written_files  # Contains absolute path to generated files.
-   ['/.../directory/hello.txt', '/.../directory/world.txt']
+   ['/.../directory/simple/hello.txt', '/.../directory/simple/world.txt']
 
 
 **************

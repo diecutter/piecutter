@@ -2,7 +2,7 @@
 Dynamic directories
 ###################
 
-**List of items in directories can be dynamically computed from templates.**
+**List of items in directories can be dynamically computed, using templates.**
 
 It is just as if directories were templates. In fact, `piecutter` actually
 implements this feature using templates. Here is the workflow when a
@@ -10,13 +10,16 @@ implements this feature using templates. Here is the workflow when a
 
 * given location, and given loader tells that resource is a directory...
 
-* if the directory holds a file named ``.directory-tree``:
+* try to get explicit tree listing, which can be either static or dynamic. At
+  the moment, "explicit tree listing" means directory holds a file named
+  ``.directory-tree``:
 
   * handle this file as the "directory tree template"
   * render this file against data
   * the result is directory tree listing (typically as JSON)
 
-* else, get the directory tree listing as usual (all files in directory)
+* else, get the implicit (and static) directory tree listing (all items in
+  directory).
 
 * finally, render each item in directory tree listing.
 
@@ -30,9 +33,10 @@ of template engines to render filenames, select templates or even alter data.
 
 Here are some use cases:
 
-* skip some files based on variables;
+* skip or include files based on variables;
 * render a single template several times with different output filenames;
 * alter template context data for some templates;
+* include templates from third-party locations;
 * use loops, conditions, text modifiers... and all template-engine features!
 
 
@@ -81,20 +85,33 @@ First setup piecutter and data:
    >>> render = piecutter.Cutter(engine=piecutter.Jinja2Engine())
    >>> render.loader.routes['file'].root = temp_dir
 
-Then render directory, print name and content of each rendered file:
+Then render directory. To check the result, we print attributes of each
+rendered file:
 
 .. doctest::
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
-   Name: /greeter.txt
+   Location: file://.../dynamic/greeter.txt
+   Name: greeter.txt
+   Path: dynamic/greeter.txt
    Content: Hello world!
 
 Introduce empty ``.directory-tree`` file
 ========================================
 
-In this step, we will update the directory as follows:
+Let's update the directory to introduce a blank ``.directory-tree`` file in
+directory:
+
+.. doctest::
+
+   >>> tree_filename = os.path.join(template_dir, '.directory-tree')
+   >>> open(tree_filename, 'w').write("")
+
+So directory now looks like this:
 
 .. code:: text
 
@@ -102,22 +119,17 @@ In this step, we will update the directory as follows:
    ├── .directory-tree  # Blank file.
    └── greeter.txt  # Contains "{{ greeter }} {{ name }}!"
 
-Let's put an empty ``.directory-tree`` file in directory:
-
-.. doctest::
-
-   >>> tree_filename = os.path.join(template_dir, '.directory-tree')
-   >>> open(tree_filename, 'w').write("")
-
 What happens if we render the directory again?
 
 .. doctest::
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
 
-No output: ``greeter.txt`` file has not been rendered.
+No output! ``greeter.txt`` file has not been rendered.
 
 `piecutter` found the ``.directory-tree`` file and used it as an explicit list
 of files to render. Since the file is empty, nothing was rendered.
@@ -142,9 +154,13 @@ And check "greeter.txt" now gets rendered:
 .. doctest::
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
+   Location: file://.../dynamic/greeter.txt
    Name: greeter.txt
+   Path: dynamic/greeter.txt
    Content: Hello world!
 
 Render ``greeter.txt`` multiple times
@@ -160,7 +176,7 @@ content:
    >>> items_to_render = [
    ...     {
    ...         "template": "greeter.txt",
-   ...         "filename": "hello.txt",
+   ...         "filename": "hello.txt",  # Explicitely change filename.
    ...     },
    ...     {
    ...         "template": "greeter.txt",
@@ -173,12 +189,24 @@ content:
 And check the result:
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
+   ...     print('----')
+   Location: file://.../dynamic/greeter.txt
    Name: hello.txt
+   Path: dynamic/hello.txt
    Content: Hello world!
+   ----
+   Location: file://.../dynamic/greeter.txt
    Name: goodbye.txt
+   Path: dynamic/goodbye.txt
    Content: Goodbye world!
+   ----
+
+As you can see, ``location`` attribute refers to template's source, whereas
+``name`` and ``path`` refer to rendered object.
 
 ``.directory-tree`` is a template
 =================================
@@ -224,12 +252,21 @@ And now the directory is dynamically rendered:
 .. doctest::
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
+   ...     print('----')
+   Location: file://.../dynamic/greeter.txt
    Name: hello.txt
+   Path: dynamic/hello.txt
    Content: Hello world!
+   ----
+   Location: file://.../dynamic/greeter.txt
    Name: goodbye.txt
+   Path: dynamic/goodbye.txt
    Content: Goodbye world!
+   ----
 
 Include locations
 =================
@@ -248,8 +285,7 @@ a remote resource (see also :doc:`loaders </loaders>` about remote locations):
    ...         "filename": "local.txt",
    ...     },
    ...     {
-   ...         "template": "https://raw.githubusercontent.com/diecutter" \
-   ...                     "/diecutter/0.7/demo/templates/greetings.txt",
+   ...         "template": "https://raw.githubusercontent.com/diecutter/diecutter/0.7/demo/templates/greetings.txt",
    ...         "filename": "remote.txt",
    ...     }
    ... ]
@@ -261,12 +297,21 @@ rendered:
 .. doctest::
 
    >>> for item in render(u'file://' + template_dir, data):
+   ...     print('Location: {}'.format(item.location))
    ...     print('Name: {}'.format(item.name))
+   ...     print('Path: {}'.format(item.path))
    ...     print('Content: {}'.format(item.read()))
+   ...     print('----')
+   Location: file://.../dynamic/greeter.txt
    Name: local.txt
+   Path: dynamic/local.txt
    Content: Hello world!
+   ----
+   Location: https://raw.githubusercontent.com/diecutter/diecutter/0.7/demo/templates/greetings.txt
    Name: remote.txt
+   Path: dynamic/remote.txt
    Content: Hello world!
+   ----
 
 This feature allows you to render a template directory that includes parts of
 third-party templates.
@@ -283,4 +328,3 @@ listing of files in a directory.
 The :doc:`cutter </cutters>` drives the loader, then uses the
 :doc:`engine </engines>` to render the directory tree template, and finally
 converts result (JSON) into actual list of locations.
-

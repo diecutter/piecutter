@@ -44,6 +44,7 @@ Let's produce the traditional ``Hello world!`` with minimal code:
 
 Notes about this example:
 
+* text datatype is recognized as a template
 * the template engine is `Python's format()`_ by default
 * data is a mapping
 * output is a file-like object
@@ -93,21 +94,8 @@ We can do the same using `Django`_:
 Load templates from various locations
 *************************************
 
-`piecutter` uses :doc:`/loaders` to fetch templates from various locations.
-
-Single templates are rendered as file-like objects, so that you can iterate
-over content.
-
-`piecutter`'s default loader interprets the following locations as single
-templates:
-
-* Python's string types (str, unicode, bytes and text)
-* Python's file objects and equivalents
-* files on local filesystem
-* remote files over HTTP
-* remote files on Github.
-
-Additional loaders could be supported, feel free to write your own!
+`piecutter` uses :doc:`/loaders` to fetch templates from various locations and
+to distinguish files from directories.
 
 See :doc:`loaders </loaders>` for details.
 
@@ -161,12 +149,19 @@ templates from remote HTTP server:
 
 .. doctest::
 
-   >>> template = u'https://raw.github.com/diecutter/piecutter/' \
-   ...            u'cutter-api-reloaded/demo/hello.txt'
+   >>> template = u'https://raw.github.com/diecutter/piecutter/cutter-api-reloaded/demo/simple/hello.txt'
    >>> output = render(template, data)
    >>> print(output.read())
    Hello world!
    <BLANKLINE>
+
+Additional loaders
+==================
+
+Feel free to write custom loaders in order to support additional locations!
+
+Basically, if you can determine template type (file or directory), fetch file
+contents and list directory items, you can implement a loader. 
 
 
 ******************
@@ -174,13 +169,7 @@ Render directories
 ******************
 
 Collections of templates, a.ka. directories, are also supported. By default,
-they are rendered as generator of multiple file-like objects.
-
-`piecutter`'s default loader interprets the following locations as collections
-of templates:
-
-* directories on local filesystem
-* remote directories on Github.
+they are rendered as generator of rendered items.
 
 Given the following directory:
 
@@ -190,12 +179,12 @@ Given the following directory:
    ├── hello.txt  # Contains "Hello {who}!\n"
    └── {who}.txt  # Contains "Whatever the content.\n"
 
-When we render the directory, we can iterate each generated item and use their
-``name`` attribute and ``read()`` method:
+When we render the directory, we can iterate generated items and use their
+attributes and methods:
 
 .. doctest::
 
-   >>> for item in render(u'file://demo/simple/', data):
+   >>> for item in render(u'file://demo/simple', data):
    ...     print('Name: {}'.format(item.name))
    ...     print('Content: {}'.format(item.read()))
    Name: hello.txt
@@ -212,29 +201,39 @@ Write generated files to disk
 
 `piecutter` uses :doc:`writers </writers>` to post-process generated content.
 
-As an example, ``piecutter.FileWriter`` writes generated files to disk:
+As an example, ``piecutter.FileWriter`` writes generated files to disk.
+
+Let's setup some output directory and check it does not exist yet.
 
 .. doctest::
 
-   >>> # Let's setup some output directory.
    >>> import os
    >>> output_directory = os.path.join(temp_dir, 'directory')
    >>> os.path.exists(output_directory)
    False
 
-   >>> # Generate files in output directory.
-   >>> render = piecutter.Cutter()
-   >>> render.writer = piecutter.FileWriter(target=output_directory)
+Now generate files in output directory:
+
+.. doctest::
+
+   >>> render = piecutter.Cutter(
+   ...     writer=piecutter.FileWriter(target=output_directory),
+   ... )
    >>> written_files = render('file://demo/simple/', data)
 
-   >>> # Inspect the results.
+... and inspect the results:
+
+.. doctest::
+
    >>> sorted(os.listdir(output_directory))
+   ['simple']
+   >>> sorted(os.listdir(os.path.join(output_directory, 'simple')))
    ['hello.txt', 'world.txt']
-   >>> print(open(os.path.join(output_directory, 'hello.txt'), 'rb').read())
+   >>> print(open(os.path.join(output_directory, 'simple', 'hello.txt'), 'rb').read())
    Hello world!
    <BLANKLINE>
    >>> written_files  # Contains absolute path to generated files.
-   ['/.../directory/hello.txt', '/.../directory/world.txt']
+   ['/.../directory/simple/hello.txt', '/.../directory/simple/world.txt']
 
 Learn more at :doc:`/writers`.
 

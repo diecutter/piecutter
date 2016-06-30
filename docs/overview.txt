@@ -3,6 +3,7 @@ Overview
 ########
 
 This document quickly describes `piecutter`'s core concepts and components.
+
 See also :doc:`/about/vision` about motivations.
 See also :doc:`/quickstart` for a tutorial.
 
@@ -13,11 +14,16 @@ Cutters
 
 :doc:`Cutters </cutters>` are highest-level components in `piecutter`. They are
 the glue around all the features of `piecutter`. They orchestrate full template
-rendering workflow, from template loading to output post-processing, via
-template rendering of course!
+rendering workflow:
 
-Cutters are callables that take ``template`` (template object or location)
-and ``data`` as input and write output somewhere.
+* cutters are callables that take ``template`` (template object or location)
+  and ``data`` as input
+
+* they use `loaders`_ to fetch templates and distinguish files from directories
+
+* they use `engines`_ to render templates against data
+
+* they run `writers`_ to post-process output.
 
 Learn more in :doc:`/cutters`.
 

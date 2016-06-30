@@ -33,7 +33,7 @@ from piecutter.loaders.http import HttpLoader  # NoQA
 from piecutter.loaders.local import LocalLoader  # NoQA
 from piecutter.loaders.proxy import TextLoader, FileObjLoader, ProxyLoader  # NoQA
 # Cutters.
-from piecutter.cutter import Cutter  # NoQA
+from piecutter.cutter import Cutter, RenderedFile, RenderedDirectory  # NoQA
 # Template engines.
 from piecutter.engines import Engine  # NoQA
 from piecutter.engines.django import DjangoEngine  # NoQA
